@@ -120,6 +120,9 @@ namespace DLAT.JTReader {
             else {
                 throw new Exception("ERROR: Negative number of quantized bits: " + quantizationBits);
             }
+
+            var hash = data.ReadU32();
+
         }
     }
     public class CompressedVertexColorArray {

@@ -16,17 +16,17 @@ namespace DLAT.JTReader {
 
             var numberOfVertexAttributes = data.ReadI32();
 
-            CompressedVertexCoordinateArray compressedVertexCoordinateArray = null;
+            //CompressedVertexCoordinateArray compressedVertexCoordinateArray = null;
             if ((vertexBindings & 0x07) != 0) { // Check for bits 1-3
                 compressedVertexCoordinateArray = new CompressedVertexCoordinateArray(data);
             }
 
-            CompressedVertexNormalArray compressedVertexNormalArray = null;
+            //CompressedVertexNormalArray compressedVertexNormalArray = null;
             if ((vertexBindings & 0x08) != 0) { // Check for bit 4
                 compressedVertexNormalArray = new CompressedVertexNormalArray(data);
             }
 
-            CompressedVertexColorArray compressedVertexColorArray = null;
+            //CompressedVertexColorArray compressedVertexColorArray = null;
             if ((vertexBindings & 0x30) != 0) { // Check for bits 5-6
                 compressedVertexColorArray = new CompressedVertexColorArray(data);
             }

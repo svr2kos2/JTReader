@@ -24,6 +24,7 @@ namespace DLAT.JTReader {
         public Element(DataSegment seg) {
             segment = seg;
             var stream = seg.dataStream;
+            var dataBegin = stream.Position; //debug
             var elementLength = stream.ReadI32();
             var begin = stream.Position;
             objectTypeID = stream.ReadGUID();
@@ -34,17 +35,33 @@ namespace DLAT.JTReader {
                 objectID = stream.ReadI32();
 
             //Debug.cache = true;
-            Debug.Log("    Element ID:" + objectID 
-                                        + " type(#g" + ObjectTypeIdentifiers.GetTypeString(objectTypeID) + "#w) len:" + elementLength);
-            dataStream = new MemoryStream(stream.ReadBytes(elementLength - (int)(stream.Position - begin)));
-            dataStream.ByteOrder(stream.ByteOrder());
-            var elementType = ObjectTypeIdentifiers.types[objectTypeID.ToString()];
-            elementData = Activator.CreateInstance(elementType, new object[] { this });
-            //Debug.cache = false;
             
-            //Debug.FlushLogs();
-            if (dataStream.Position != dataStream.Length)
-                Debug.Log("#rElement data not fully read!#w", 2);
+            dataStream = new MemoryStream(stream.ReadBytes(elementLength - (int)(stream.Position - begin), 1));
+            dataStream.ByteOrder(stream.ByteOrder());
+            dataStream.Position = 0;
+            var elementType = ObjectTypeIdentifiers.types[objectTypeID.ToString()];
+
+            Debug.Log("    Element ID:" + objectID
+                                        + " type(#g" + ObjectTypeIdentifiers.GetTypeString(objectTypeID) + "#w) "
+                                        + "begin:" + dataBegin + " len:" + elementLength + " end:" +
+                                        stream.Position + " dataLen:" + dataStream.Length);
+
+            try {
+                elementData = Activator.CreateInstance(elementType, new object[] { this });
+                //Debug.cache = false;
+            
+                //Debug.FlushLogs();
+                if (dataStream.Position + 1 == dataStream.Length) return; 
+                //read length not equal
+                Debug.Log(
+                    dataStream.Position < dataStream.Length - 1
+                        ? $"#yElement data not fully read! Remain:{dataStream.Length - dataStream.Position - 1}#w"
+                        : "#rElement data over read!#w", 2);
+            }
+            catch {
+                Debug.Log("#rRead failed.#w", 2);
+            }
+            
         }
     }
 }

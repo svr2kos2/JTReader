@@ -14,7 +14,6 @@ namespace DLAT.JTReader {
                 version = data.ReadU8();
             else
                 version = data.ReadI16();
-            version = data.ReadI16();
             var emptyField = data.ReadI32();
         }
     }

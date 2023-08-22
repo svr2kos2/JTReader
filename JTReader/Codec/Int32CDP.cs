@@ -48,7 +48,7 @@ namespace DLAT.JTReader {
             int symbolCount;
 
             if (codecType == CODECTYPE_HUFFMAN || codecType == CODECTYPE_ARITHMETIC) {
-                int32ProbabilityContexts = new Int32ProbabilityContexts(data);
+                int32ProbabilityContexts = new Int32ProbabilityContexts(data, 8);
                 outOfBandValueCount = data.ReadI32();
                 if (outOfBandValueCount > 0)
                     outOfBandValues = DecodeBytes(data);
@@ -57,7 +57,7 @@ namespace DLAT.JTReader {
             codeTextLength = data.ReadI32();
             valueElementCount = data.ReadI32();
             symbolCount = valueElementCount;
-            if (int32ProbabilityContexts != null && int32ProbabilityContexts.probabilityContextTableCount > 1)
+            if (int32ProbabilityContexts != null && int32ProbabilityContexts.int32ProbabilityContextTableEntries.Length > 1)
                 symbolCount = data.ReadI32();
 
             int intsToRead = data.ReadI32();
@@ -82,7 +82,7 @@ namespace DLAT.JTReader {
                 codeTextBytes = codeText,
                 codeTextLengthInBits = codeTextLength,
                 valueElementCount = valueElementCount,
-                symbolCount = symbolCount,
+                SymbolCount = symbolCount,
                 int32ProbabilityContexts = int32ProbabilityContexts,
                 bitSteam = new BitStream(new MemoryStream(codeText), codeTextLength),
                 bitsRead = 0,
@@ -192,10 +192,18 @@ namespace DLAT.JTReader {
         }
     }
     public class Int32ProbabilityContexts {
-        public byte probabilityContextTableCount;
         public List<Int32ProbabilityContextTableEntry>[] int32ProbabilityContextTableEntries;
-        public Int32ProbabilityContexts(Stream data) {
-            probabilityContextTableCount = data.ReadU8();
+        public Int32ProbabilityContexts(Stream data, int majorVersion) {
+            if (majorVersion < 9) {
+                ReadMk1(data);
+            }
+            else {
+                ReadMk2(data);
+            }
+        }
+
+        public void ReadMk1(Stream data) {
+            var probabilityContextTableCount = data.ReadU8();
             int32ProbabilityContextTableEntries = new List<Int32ProbabilityContextTableEntry>[probabilityContextTableCount];
             Dictionary<int, int> symbol2AssociatedValue = new Dictionary<int, int>();
             int symbolBits = 0;
@@ -225,7 +233,34 @@ namespace DLAT.JTReader {
                     int32ProbabilityContextTableEntries[i].Add(entry);
                 }
             }
-            bitSteam.ApplyPositionToByteStream();
+        }
+
+        public void ReadMk2(Stream data) {
+            var bitBuffer = new BitStream(data);
+
+            var probabilityContextTableEntryCount = bitBuffer.ReadI32(16);
+            var numberSymbolBits = bitBuffer.ReadI32(6);
+            var numberOccurrenceCountBits = bitBuffer.ReadI32(6);
+            var numberValueBits = bitBuffer.ReadI32(6);
+            var minValue = bitBuffer.ReadI32(32);
+
+            int32ProbabilityContextTableEntries = new List<Int32ProbabilityContextTableEntry>[1];
+            for(var i = 0; i < int32ProbabilityContextTableEntries.Length; i++){
+                int32ProbabilityContextTableEntries[i] = new List<Int32ProbabilityContextTableEntry>();
+
+                for(var j = 0; j < probabilityContextTableEntryCount; j++) {
+                    var int32ProbabilityContextTableEntry = new
+                        Int32ProbabilityContextTableEntry(bitBuffer, numberSymbolBits, numberOccurrenceCountBits,
+                            numberValueBits, -1, minValue);
+	
+                    int32ProbabilityContextTableEntries[i].Add(int32ProbabilityContextTableEntry);
+                }
+            }
+
+            var bitsToSkip = (int)bitBuffer.Position % 8;
+            if(bitsToSkip > 0){
+                bitBuffer.ReadI32((8 - bitsToSkip));
+            }
         }
     }
     public class Int32ProbabilityContextTableEntry {
@@ -236,17 +271,29 @@ namespace DLAT.JTReader {
         public Int32ProbabilityContextTableEntry(BitStream bitStream,
             int symbolBits, int occurrenceCountBits,
             int valueBits, int nextContextBits, int minValue) {
-            symbol = bitStream.ReadI32(symbolBits) - 2;
-            occurrenceCount = bitStream.ReadI32(occurrenceCountBits);
-            associatedValue = bitStream.ReadI32(valueBits) + minValue;
-            nextContext = bitStream.ReadI32(nextContextBits);
+            symbol = bitStream.ReadU32(symbolBits) - 2;
+            occurrenceCount = bitStream.ReadU32(occurrenceCountBits);
+            associatedValue = bitStream.ReadU32(valueBits) + minValue;
+            nextContext = bitStream.ReadU32(nextContextBits);
         }
     }
     public class CodecDriver {
         public byte[] codeTextBytes;
         public int codeTextLengthInBits;
         public int valueElementCount;
-        public int symbolCount;
+
+        private int _symbolCount;
+
+        public int SymbolCount {
+            set => _symbolCount = value;
+            get {
+                if(_symbolCount == -1){
+                    return valueElementCount;
+                }
+
+                return (int32ProbabilityContexts.int32ProbabilityContextTableEntries.Length <= 1) ? valueElementCount : _symbolCount;
+            }
+        }
         public Int32ProbabilityContexts int32ProbabilityContexts;
         public BitStream bitSteam;
         public int bitsRead;
@@ -254,8 +301,8 @@ namespace DLAT.JTReader {
 
         public int[] GetNextCodeText() {
             int nBits = Math.Min(32, codeTextLengthInBits - bitsRead);
-            int uCodeText = bitSteam.ReadI32(nBits);
-            if (uCodeText < 32)
+            int uCodeText = bitSteam.ReadU32(nBits);
+            if (nBits < 32)
                 uCodeText <<= (32 - nBits);
             bitsRead += nBits;
             return new int[] { uCodeText, nBits };

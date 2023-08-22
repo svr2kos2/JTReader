@@ -49,6 +49,7 @@ namespace DLAT.JTReader {
 
             fileStream.Position = (long)TOCOffset;
             var entryCount = fileStream.ReadI32();
+            Debug.Log("Segment Count:" + entryCount);
             segments = new List<DataSegment>();
             for (int i = 0; i < entryCount; ++i) {
                 var seg = new DataSegment(this);

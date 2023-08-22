@@ -58,31 +58,31 @@ namespace DLAT.JTReader {
         public List<double> normals;
         public List<double> vertices;
         public LosslessCompressedRawVertexData(Stream data,int textureCoordBinding, int colorBinding, int normalBinding) {
-            int uncompressedDataSize = data.ReadI32();
-            int compressedDataSize = data.ReadI32();
+            var uncompressedDataSize = data.ReadI32();
+            var compressedDataSize = data.ReadI32();
             float[] rawVertexData = null;
 
             //uncompressed raw data
             if(compressedDataSize < 0) {
                 compressedDataSize *= -1;
                 rawVertexData = new float[compressedDataSize / 4];
-                for (int i = 0; i < rawVertexData.Length; i++) {
+                for (var i = 0; i < rawVertexData.Length; i++) {
                     rawVertexData[i] = data.ReadF32();
                 }
                 //zlib compressed raw data
             } else if(compressedDataSize > 0) {
                 var zlibHeader = data.ReadBytes(2);
-                var compressedBytes = new MemoryStream(data.ReadBytes(compressedDataSize));
+                var compressedBytes = new MemoryStream(data.ReadBytes(compressedDataSize - 2));
                 var uncompressedStream = new MemoryStream();
-                var uncompressedDelate = new DeflateStream(compressedBytes, CompressionMode.Decompress);
-                uncompressedDelate.CopyTo(uncompressedStream);
+                var uncompressedDeflate = new DeflateStream(compressedBytes, CompressionMode.Decompress);
+                uncompressedDeflate.CopyTo(uncompressedStream);
                 uncompressedStream.Position = 0;
                 if (uncompressedStream.Length != uncompressedDataSize) {
                     throw new Exception("ZLIB decompression seems to be failed! Expected length: " + uncompressedDataSize + " -> resulting length: " + uncompressedStream.Length);
                 }
 
                 rawVertexData = new float[uncompressedStream.Length / 4];
-                for (int i = 0; i < rawVertexData.Length; i++) {
+                for (var i = 0; i < rawVertexData.Length; i++) {
                     rawVertexData[i] = uncompressedStream.ReadF32();
                 }
             } else {
@@ -95,9 +95,9 @@ namespace DLAT.JTReader {
             normals = new List<double>();
             vertices = new List<double>();
 
-            bool readTextureCoordinate = textureCoordBinding == VertexBasedShapeCompressedRepData.BINDING_PER_VERTEX;
-            bool readColor = colorBinding == VertexBasedShapeCompressedRepData.BINDING_PER_VERTEX;
-            bool readNormal = normalBinding == VertexBasedShapeCompressedRepData.BINDING_PER_VERTEX;
+            var readTextureCoordinate = textureCoordBinding == VertexBasedShapeCompressedRepData.BINDING_PER_VERTEX;
+            var readColor = colorBinding == VertexBasedShapeCompressedRepData.BINDING_PER_VERTEX;
+            var readNormal = normalBinding == VertexBasedShapeCompressedRepData.BINDING_PER_VERTEX;
 
             for (int i = 0; i < rawVertexData.Length;) {
                 if (readTextureCoordinate) {

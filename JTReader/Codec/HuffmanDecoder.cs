@@ -205,7 +205,7 @@ namespace DLAT.JTReader {
 
         public static int[] Decode(CodecDriver codecDriver) {
             List<HuffmanTreeNode> huffmanRootNodes = new List<HuffmanTreeNode>();
-            int numberOfProbabilityContexts = codecDriver.int32ProbabilityContexts.probabilityContextTableCount;
+            int numberOfProbabilityContexts = codecDriver.int32ProbabilityContexts.int32ProbabilityContextTableEntries.Length;
             List<HuffmanCodecContext> vHuffCntx = new List<HuffmanCodecContext>();
             for (int i = 0; i < numberOfProbabilityContexts; i++) {
                 // Get the i'th probability context

@@ -67,13 +67,9 @@ namespace DLAT.JTReader {
                 throw new Exception("TOC Entry Segment Length doesn't equal to Segment Header Segment Length");
             //----Segment Header----
 
-            Debug.Log("Segment type(#b" + 
-                SegmentTypes.GetType(segmentType).Item1 + "#w) ID:" + segmentID +" len:" +
-                segmentLength);
-
             var compressed = false;
-            var supportZLIB = SegmentTypes.GetType(segmentType).Item2;
-            if(supportZLIB) {
+            var supportCompress = SegmentTypes.GetType(segmentType).Item2;
+            if(supportCompress) {
                 var compressionFlag = fs.ReadI32();
                 var compressedLength = fs.ReadI32() - 1;
                 var compressionAlgorithm = fs.ReadU8();
@@ -83,7 +79,7 @@ namespace DLAT.JTReader {
                 if (compressionFlag == 2 && compressionAlgorithm == 2) {
                     compressed = true;
                     var zlibHeader = fs.ReadBytes(2);
-                    dataStream = DecompressZLIB(new MemoryStream(fs.ReadBytes(compressedLength)));
+                    dataStream = DecompressZLIB(new MemoryStream(fs.ReadBytes(compressedLength - 2)));
                 }
                 else if(compressionFlag == 3 && compressionAlgorithm == 3) {
                     compressed = true;
@@ -95,6 +91,11 @@ namespace DLAT.JTReader {
 
             dataStream.ByteOrder(fs.ByteOrder());
             fs.Position = TOCEndPosition;
+
+            Debug.Log("Segment type(#b" +
+                      SegmentTypes.GetType(segmentType).Item1 + "#w) ID:" + segmentID + " begin:" + fs.Position +
+                      " len:" +
+                      segmentLength + " end:" + (fs.Position + segmentLength) + "| dataLen:" + dataStream.Length);
 
             InitializeElements();
 

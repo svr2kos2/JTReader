@@ -44,7 +44,7 @@ namespace DLAT.JTReader {
             }
 
             var codeTextLength = data.ReadI32();
-            intsToRead = (int)(codeTextLength / 32.0 + 0.99);
+            intsToRead = codeTextLength / 32 + (codeTextLength % 32 == 0 ? 0 : 1);
             var codeText = new byte[intsToRead * 4];
             for (int i = 0; i < intsToRead; i++) {
                 byte[] buffer = data.ReadBytes(4);
@@ -66,7 +66,7 @@ namespace DLAT.JTReader {
             int[] outOfBandValues = null;
 
             if (codecType == CODECTYPE_ARITHMETIC) {
-                int32ProbabilityContexts = new Int32ProbabilityContexts(data);
+                int32ProbabilityContexts = new Int32ProbabilityContexts(data, 9);
                 outOfBandValues = DecodeBytes(data);
                 if (codeTextLength == 0 && outOfBandValues.Length == valueCount)
                     return outOfBandValues;
@@ -76,7 +76,7 @@ namespace DLAT.JTReader {
                 codeTextBytes = codeText,
                 codeTextLengthInBits = codeTextLength,
                 valueElementCount = valueCount,
-                symbolCount = 0,
+                SymbolCount = -1,
                 int32ProbabilityContexts = int32ProbabilityContexts,
                 bitSteam = new BitStream(new MemoryStream(codeText), codeTextLength),
                 bitsRead = 0,

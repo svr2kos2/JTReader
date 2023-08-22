@@ -13,10 +13,6 @@ namespace DLAT.JTReader {
         
         public Tri_StripSetShapeLODData(Element ele) {
             var data = ele.dataStream;
-            if (ele.majorVersion > 8) {
-                var leleLen = data.ReadI32();
-                var leleBytes = data.ReadBytes(leleLen);
-            }
             vertexShapeLodData = new VertexShapeLODData(ele);
             versionNumber = ele.majorVersion > 9 ? data.ReadU8() : data.ReadI16();
             if (ele.majorVersion < 9) {

@@ -29,6 +29,7 @@ namespace DLAT.JTReader {
                     case 'r': Console.ForegroundColor = ConsoleColor.Red; break;
                     case 'g': Console.ForegroundColor = ConsoleColor.Green; break;
                     case 'b': Console.ForegroundColor = ConsoleColor.Blue; break;
+                    case 'y': Console.ForegroundColor = ConsoleColor.Yellow; break;
                     case 'w': Console.ForegroundColor = ConsoleColor.White; break;
                 }
                 Console.Write(s[i].Substring(1));

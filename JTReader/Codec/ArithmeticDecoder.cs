@@ -25,7 +25,7 @@ namespace DLAT.JTReader {
                 _symbolsCounts = new List<int>();
                 _entryByAccumCountPerContext = new List<SortedDictionary<int, int>>();
 
-                for (int i = 0; i < _int32ProbabilityContexts.probabilityContextTableCount; i++) {
+                for (int i = 0; i < _int32ProbabilityContexts.int32ProbabilityContextTableEntries.Length; i++) {
                     int accumulatedCount = 0;
                     _entryByAccumCountPerContext.Add(new SortedDictionary<int, int>());
                     for (int j = 0; j < _int32ProbabilityContexts.int32ProbabilityContextTableEntries[i].Count; j++) {
@@ -77,7 +77,7 @@ namespace DLAT.JTReader {
             int high = 0xffff;
             int bitBuffer = 0;
             int bits = 0;
-            int symbolCount = codecDriver.symbolCount;
+            int symbolCount = codecDriver.SymbolCount;
             int currentContext = 0;
             int[] newSymbolRange = new int[3];
             int outOfBandDataCounter = 0;

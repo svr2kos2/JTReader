@@ -18,7 +18,7 @@ namespace DLAT.JTReader {
                     if (bitFieldWith == 0) {
                         decodedSymbol = 0;
                     } else {
-                        decodedSymbol = encodedBits.ReadI32(bitFieldWith);
+                        decodedSymbol = encodedBits.ReadU32(bitFieldWith);
                         decodedSymbol <<= (32 - bitFieldWith);
                         decodedSymbol >>= (32 - bitFieldWith);
                     }
@@ -26,7 +26,7 @@ namespace DLAT.JTReader {
 
                 } else {
                     // Adjust bit field length
-                    int adjustmentBit = encodedBits.ReadI32(1);
+                    int adjustmentBit = encodedBits.ReadU32(1);
                     do {
                         if (adjustmentBit == 1) {
                             bitFieldWith += 2;
@@ -40,7 +40,7 @@ namespace DLAT.JTReader {
                     if (bitFieldWith == 0) {
                         decodedSymbol = 0;
                     } else {
-                        decodedSymbol = encodedBits.ReadI32(bitFieldWith);
+                        decodedSymbol = encodedBits.ReadU32(bitFieldWith);
                         decodedSymbol <<= (32 - bitFieldWith);
                         decodedSymbol >>= (32 - bitFieldWith);
                     }
@@ -68,7 +68,7 @@ namespace DLAT.JTReader {
 
                 // Read each fixed-width field and output the value
                 while ((encodedBits.Position < totalNumberOfBits) || (decodedSymbols.Count < expectedValues)) {
-                    int decodedSymbol = encodedBits.ReadI32(bitFieldWith);
+                    int decodedSymbol = encodedBits.ReadU32(bitFieldWith);
                     decodedSymbol += minSymbol;
                     decodedSymbols.Add(decodedSymbol);
                 }

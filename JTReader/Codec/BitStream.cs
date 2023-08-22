@@ -8,43 +8,56 @@ using System.Threading.Tasks;
 
 namespace DLAT.JTReader {
     public class BitStream {
-        long position;
-        long length;
-        Stream byteStream;
-
-        public long Length { get { return length; } }
-        public long Position { get { return position; } }
+        private long _offset;
+        private long _position;
+        private long _length;
+        private Stream _byteStream;
+        
+        public long Length => _length;
+        public long Position => _position - _offset;
 
         public BitStream(Stream stream, int bitLength = -1) {
-            byteStream = stream;
-            position = stream.Position << 3;
-            length = bitLength == -1 ? stream.Length << 3 : bitLength;
+            _byteStream = stream;
+            _offset = stream.Position << 3;
+            _position = _offset;
+            _length = bitLength == -1 ? (stream.Length - stream.Position) << 3 : bitLength;
+        }
+
+        public BitStream(long position) {
+            _position = position;
         }
 
         public int ReadI32(int bitLength) {
-            int res = 0;
-            for (int i = 0; i < bitLength; ++i) {
-                res <<= 1;
-                var pos = position + i;
-                byteStream.Position = pos / 8;
-                var b = byteStream.ReadU8();
-                res |= (b & (1 << (int)(7 - (pos % 8)))) == 0 ? 0 : 1;
-            }
-            position += bitLength;
+            var res = ReadU32(bitLength);
+            res <<= (32 - bitLength);
+            res >>= (32 - bitLength);
             return res;
         }
-        public uint ReadU32(int bitLength) {
-            var bytes = BitConverter.GetBytes(ReadI32(bitLength));
-            return BitConverter.ToUInt32(bytes, 0);
+        public int ReadU32(int bitLength) {
+            if (Position > _length)
+                throw new Exception("BitStream over read.");
+            if (bitLength < 1)
+                return 0;
+            var res = 0;
+            for (int i = 0; i < bitLength; ++i) {
+                res <<= 1;
+                var pos = _position + i;
+                _byteStream.Position = pos / 8;
+                var b = _byteStream.ReadU8();
+                res |= (b & (1 << (int)(7 - (pos % 8)))) == 0 ? 0 : 1;
+            }
+            _position += bitLength;
+            ApplyPositionToByteStream();
+            return res;
         }
         public float ReadF32(int bitLength) {
             var bytes = BitConverter.GetBytes(ReadI32(bitLength));
             return BitConverter.ToSingle(bytes, 0);
         }
 
-        public void ApplyPositionToByteStream() {
-            var pos = position / 8 + (position % 8 == 0 ? 0 : 1);
-            byteStream.Position = pos;
+        private void ApplyPositionToByteStream() {
+            var pos = _position / 8 + (_position % 8 == 0 ? 0 : 1);
+            _byteStream.Position = pos;
         }
 
     }

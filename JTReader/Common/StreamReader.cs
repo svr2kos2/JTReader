@@ -20,12 +20,12 @@ namespace DLAT.JTReader {
             byteOrders.Add(stream, setOrder.Value);
             return setOrder.Value;
         }
-        public static byte[] ReadBytes(this Stream stream, int count) {
-            var buffer = new byte[count];
+        public static byte[] ReadBytes(this Stream stream, int count, int padEnd = 0) {
+            var buffer = new byte[count + padEnd];
             stream.Read(buffer, 0, count);
             return buffer;
         }
-        public static byte[] ReadBytes(this Stream stream, long pos, int count) {
+        public static byte[] ReadBytes(this Stream stream, long pos, int count, int padEnd = 0) {
             stream.Position = pos;
             return ReadBytes(stream, count);
         }
