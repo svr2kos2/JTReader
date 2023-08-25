@@ -41,8 +41,6 @@ namespace DLAT.JTReader {
 
             long readHash = data.ReadU32();
             
-            Debug.Log("#gTopologicallyCompressedRepData Loaded.#w");
-            
             vertexRecords = new TopologicallyCompressedVertexRecords(data);
         }
         

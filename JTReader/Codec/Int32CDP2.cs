@@ -20,8 +20,6 @@ namespace DLAT.JTReader {
             var codecType = data.ReadU8();
             if ((codecType != 0) && (codecType != 1) && (codecType != 3) && (codecType != 4))
                 throw new Exception("Found invalid codec type: " + codecType);
-
-            Debug.Log("#rDecode#w:" + valueCount + " type:" + codecType, 2);
             
             if (codecType == CODECTYPE_CHOPPER) {
                 var chopBits = data.ReadU8();

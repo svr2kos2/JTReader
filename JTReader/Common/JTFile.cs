@@ -58,6 +58,7 @@ namespace DLAT.JTReader {
                     LSGSegment = seg;
                 segments.Add(seg);
             }
+            Debug.Log("#gRead Done!#w");
             fileStream.Close();
         }
 

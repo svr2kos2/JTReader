@@ -26,7 +26,7 @@ namespace DLAT.JTReader {
 
             var codecType = data.ReadU8();
 
-            Debug.Log("#rDecode#w:" + valueCount + " type:" + codecType, 2);
+            //Debug.Log("#rDecode#w:" + valueCount + " type:" + codecType, 2);
             
             if ((codecType != 0) && (codecType != 1) && (codecType != 3) 
                 && (codecType != 4)&& (codecType != 5))
@@ -49,11 +49,7 @@ namespace DLAT.JTReader {
             if (codecType == CODECTYPE_MOVE_TO_FRONT) {
                 var choppedMSBData = DecodeBytes(data); 
                 var windowOffsets = DecodeBytes(data);
-                
-                
-                
-                throw new NotImplementedException();
-                
+                decodedSymbols.AddRange(MoveToFront.Decode(choppedMSBData, windowOffsets));
                 return decodedSymbols.ToArray();
             }
             

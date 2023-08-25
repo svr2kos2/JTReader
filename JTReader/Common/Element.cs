@@ -46,21 +46,22 @@ namespace DLAT.JTReader {
                                         + "begin:" + dataBegin + " len:" + elementLength + " end:" +
                                         stream.Position + " dataLen:" + dataStream.Length);
 
-            try {
-                elementData = Activator.CreateInstance(elementType, new object[] { this });
-                //Debug.cache = false;
-            
-                //Debug.FlushLogs();
-                if (dataStream.Position + 1 == dataStream.Length) return; 
+           
+            elementData = Activator.CreateInstance(elementType, new object[] { this });
+            //Debug.cache = false;
+        
+            //Debug.FlushLogs();
+            if (dataStream.Position + 1 == dataStream.Length) return;
+            {
                 //read length not equal
                 Debug.Log(
                     dataStream.Position < dataStream.Length - 1
                         ? $"#yElement data not fully read! Remain:{dataStream.Length - dataStream.Position - 1}#w"
                         : "#rElement data over read!#w", 2);
+                if(dataStream.Position >= dataStream.Length - 1)
+                    throw new Exception("Read Align Error");
             }
-            catch (Exception e){
-                Debug.Log($"#rRead failed. {e.Message}#w", 2);
-            }
+
             
         }
     }

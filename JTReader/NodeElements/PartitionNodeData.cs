@@ -19,7 +19,7 @@ namespace DLAT.JTReader {
         public PartitionNodeData(Element ele) : base(ele) {
             var data = ele.dataStream;
 
-            if (ele.majorVersion == 10 && ele.minorVersion == 0) {
+            if (ele.majorVersion == 10 && ele.minorVersion < 5) {
                 var localVersionFlag = data.ReadU8();
             }
 
