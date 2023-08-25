@@ -24,6 +24,8 @@ namespace DLAT.JTReader {
         
         public int bindingAttrubutes;
         public QuantizationParameters parameters;
+
+        public int objectID = -1;
         
         public VertexShapeLODData(Element ele) {
             var data = ele.dataStream;
@@ -32,6 +34,13 @@ namespace DLAT.JTReader {
                 version = ele.majorVersion == 9 ? (byte)data.ReadI16() : data.ReadU8();
                 ulong vertexBinding = data.ReadU64();
 
+                if (ele.majorVersion > 9) {
+                    var headerLen = data.ReadI32();
+                    var typeID = new GUID(data);
+                    var baseType = data.ReadU8();
+                    objectID = data.ReadI32();
+                }
+                
                 if(ele.objectTypeID.ToString() == Tri_StripSetShapeLODData.typeID) {
                     topoMeshTopologicallyCompressedLODData = new TopoMeshTopologicallyCompressedLODData(ele);
                 } else {
@@ -51,13 +60,13 @@ namespace DLAT.JTReader {
 
     public class TopoMeshLODData {
         public byte version;
-        public int vertexRecordsObjectId;
+        public uint vertexRecordsObjectId;
 
         public TopoMeshLODData(Element ele) {
             var data = ele.dataStream;
             if (ele.majorVersion > 8)
-                version = ele.majorVersion == 9 ? (byte)data.ReadI16() : data.ReadU8();
-            vertexRecordsObjectId = data.ReadI32();
+                version = data.ReadVersionNumber();
+            vertexRecordsObjectId = data.ReadU32();
         }
         
     }
@@ -70,7 +79,7 @@ namespace DLAT.JTReader {
         public TopoMeshCompressedLODData(Element ele) : base(ele) {
             var data = ele.dataStream;
             if (ele.majorVersion > 8)
-                versionNumber = ele.majorVersion == 9 ? (byte)data.ReadI16() : data.ReadU8();
+                versionNumber = data.ReadVersionNumber();
             if (versionNumber == 1)
                 repDataV1 = new TopoMeshCompressedRepDataV1(ele);
             else if (version == 2)
@@ -88,7 +97,7 @@ namespace DLAT.JTReader {
         public TopoMeshTopologicallyCompressedLODData(Element ele) : base(ele) {
             var data = ele.dataStream;
             if (ele.majorVersion > 8)
-                versionNumber = ele.majorVersion == 9 ? (byte)data.ReadI16() : data.ReadU8();
+                versionNumber = data.ReadVersionNumber();
             repData = new TopologicallyCompressedRepData(ele);
         }
     }
@@ -96,14 +105,14 @@ namespace DLAT.JTReader {
 
     public static class VertexBinding {
         public static int VertexCoordinate(this ulong vertexBindings) {
-            if ((vertexBindings & (1 << 0)) != 0) return 1;
-            if ((vertexBindings & (1 << 1)) != 0) return 2;
-            if ((vertexBindings & (1 << 2)) != 0) return 3;
+            if ((vertexBindings & (1 << 0)) != 0) return 2;
+            if ((vertexBindings & (1 << 1)) != 0) return 3;
+            if ((vertexBindings & (1 << 2)) != 0) return 4;
             return 0;
         }
 
         public static int Normal(this ulong vertexBindings) {
-            if ((vertexBindings & (1 << 3)) != 0) return 1;
+            if ((vertexBindings & (1 << 3)) != 0) return 3;
             return 0;
         }
 

@@ -5,24 +5,26 @@ using System.Text;
 
 namespace DLAT.JTReader {
     public static class StreamReader {
-        private static Dictionary<Stream,int> byteOrders = new Dictionary<Stream, int>();
-        public static int ByteOrder(this Stream stream, int? setOrder = null) {
-            if (byteOrders.ContainsKey(stream)) {
-                if (setOrder == null)
-                    return byteOrders[stream];
+        private static Dictionary<Stream, JTFile> _fromJTFile = new Dictionary<Stream, JTFile>();
+        public static JTFile FromJTFile(this Stream stream, JTFile setFile = null) {
+            if (_fromJTFile.ContainsKey(stream)) {
+                if (setFile == null)
+                    return _fromJTFile[stream];
                 else {
-                    byteOrders[stream] = setOrder.Value;
-                    return setOrder.Value;
+                    _fromJTFile[stream] = setFile;
+                    return setFile;
                 }
             }
-            if (setOrder == null)
-                throw new Exception("Byte order not set");
-            byteOrders.Add(stream, setOrder.Value);
-            return setOrder.Value;
+            if (setFile == null)
+                throw new Exception("JTFile order not set");
+            _fromJTFile.Add(stream, setFile);
+            return setFile;
         }
         public static byte[] ReadBytes(this Stream stream, int count, int padEnd = 0) {
             var buffer = new byte[count + padEnd];
-            stream.Read(buffer, 0, count);
+            var readed = stream.Read(buffer, 0, count);
+            if (readed < count)
+                throw new Exception("Over read");
             return buffer;
         }
         public static byte[] ReadBytes(this Stream stream, long pos, int count, int padEnd = 0) {
@@ -93,5 +95,11 @@ namespace DLAT.JTReader {
                 res.Add(data.ReadF32());
             return res;
         }
+
+        public static byte ReadVersionNumber(this Stream data) {
+            var jt = data.FromJTFile();
+            return jt.majorVersion > 9 ? data.ReadU8() : (byte)data.ReadI16();
+        }
+        
     }
 }

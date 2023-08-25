@@ -40,26 +40,26 @@ namespace DLAT.JTReader {
                 for (int j = 0; j < fieldTypeComponents; j++) {
                     string fieldTypeData = CODEC.fieldTypeData[fieldTypes[i]].Item1;
                     if (fieldTypeData[0] == 'F') {
-                        dataExponentsLists.Add(Int32CDP2.ReadVecU32(data, PredictorType.PredNull));
+                        dataExponentsLists.Add(Int32CDP.ReadVecU32(data, PredictorType.PredNull));
 
                         if (fieldTypeData.Equals("F64")) {
-                            dataUpperMantissaeLists.Add(Int32CDP2.ReadVecU32(data, PredictorType.PredNull));
+                            dataUpperMantissaeLists.Add(Int32CDP.ReadVecU32(data, PredictorType.PredNull));
                         }
 
                         if (fieldTypeData.Equals("F32") || fieldTypeData.Equals("F64")) {
-                            dataLowerMantissaeLists.Add(Int32CDP2.ReadVecU32(data, PredictorType.PredNull));
+                            dataLowerMantissaeLists.Add(Int32CDP.ReadVecU32(data, PredictorType.PredNull));
                         }
                     }
                     else {
-                        dataU320Lists.Add(Int32CDP2.ReadVecU32(data, PredictorType.PredNull));
+                        dataU320Lists.Add(Int32CDP.ReadVecU32(data, PredictorType.PredNull));
 
                         if (fieldTypeData.Equals("U32") || fieldTypeData.Equals("I32") ||
                             fieldTypeData.Equals("U64") || fieldTypeData.Equals("I64")) {
-                            dataU321Lists.Add(Int32CDP2.ReadVecU32(data, PredictorType.PredNull));
+                            dataU321Lists.Add(Int32CDP.ReadVecU32(data, PredictorType.PredNull));
                         }
 
                         if (fieldTypeData.Equals("U64") || fieldTypeData.Equals("I64")) {
-                            dataU322Lists.Add(Int32CDP2.ReadVecU32(data, PredictorType.PredNull));
+                            dataU322Lists.Add(Int32CDP.ReadVecU32(data, PredictorType.PredNull));
                         }
                     }
                 }

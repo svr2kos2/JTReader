@@ -4,12 +4,19 @@ using System.IO;
 using System.Linq;
 
 namespace DLAT.JTReader {
-    public class Int32CDP2 {
+    /// <summary>
+    /// Int32CDP for jt version 10+
+    /// from official document this class should be named Int32CDP
+    /// but to identify with Int32CDP from version 8,9
+    /// I named it to Int32CDP3
+    /// </summary>
+    public class Int32CDP3 {
         public const int CODECTYPE_NULL = 0;
         public const int CODECTYPE_BITLENGTH = 1;
-        public const int CODECTYPE_HUFFMAN = 2;
+        public const int CODECTYPE_ILLEGAL = 2;
         public const int CODECTYPE_ARITHMETIC = 3;
         public const int CODECTYPE_CHOPPER = 4;
+        public const int CODECTYPE_MOVE_TO_FRONT = 5;
 
         public static int[] DecodeBytes(Stream data) {
             var decodedSymbols = new List<int>();
@@ -18,15 +25,17 @@ namespace DLAT.JTReader {
                 return decodedSymbols.ToArray();
 
             var codecType = data.ReadU8();
-            if ((codecType != 0) && (codecType != 1) && (codecType != 3) && (codecType != 4))
-                throw new Exception("Found invalid codec type: " + codecType);
 
             Debug.Log("#rDecode#w:" + valueCount + " type:" + codecType, 2);
             
+            if ((codecType != 0) && (codecType != 1) && (codecType != 3) 
+                && (codecType != 4)&& (codecType != 5))
+                throw new Exception("Found invalid codec type: " + codecType);
+
             if (codecType == CODECTYPE_CHOPPER) {
                 var chopBits = data.ReadU8();
-                if (chopBits == 0)
-                    return DecodeBytes(data);
+                //if (chopBits == 0)
+                //    return DecodeBytes(data);
                 var valueBias = data.ReadI32();
                 var valueSpanBits = data.ReadU8();
                 var choppedMSBData = DecodeBytes(data);
@@ -37,6 +46,17 @@ namespace DLAT.JTReader {
                 return decodedSymbols.ToArray();
             }
 
+            if (codecType == CODECTYPE_MOVE_TO_FRONT) {
+                var choppedMSBData = DecodeBytes(data); 
+                var windowOffsets = DecodeBytes(data);
+                
+                
+                
+                throw new NotImplementedException();
+                
+                return decodedSymbols.ToArray();
+            }
+            
             int intsToRead = 0;
             if (codecType == CODECTYPE_NULL) {
                 intsToRead = data.ReadI32() / 4;
@@ -65,11 +85,13 @@ namespace DLAT.JTReader {
             }
 
             Int32ProbabilityContexts int32ProbabilityContexts = null;
-            int[] outOfBandValues = null;
-
+            int[] outOfBandValues = new int[0];
+            
             if (codecType == CODECTYPE_ARITHMETIC) {
                 int32ProbabilityContexts = new Int32ProbabilityContexts(data);
-                outOfBandValues = DecodeBytes(data);
+                
+                if(int32ProbabilityContexts.hasOutOfBandValues)
+                    outOfBandValues = DecodeBytes(data);
                 if (codeTextLength == 0 && outOfBandValues.Length == valueCount)
                     return outOfBandValues;
             }
@@ -87,7 +109,7 @@ namespace DLAT.JTReader {
 
             switch (codecType) {
                 case CODECTYPE_BITLENGTH:
-                    decodedSymbols.AddRange(BitlengthDecoder.Decode2(codecDriver));
+                    decodedSymbols.AddRange(BitlengthDecoder.Decode3(codecDriver));
                     break;
 
                 case CODECTYPE_ARITHMETIC:

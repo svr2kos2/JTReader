@@ -17,10 +17,8 @@ namespace DLAT.JTReader {
             var data = ele.dataStream;
             if (ele.majorVersion == 8)
                 ele.objectID = data.ReadI32();
-            else if (ele.majorVersion == 9)
-                version = data.ReadI16();
-            else if (ele.majorVersion == 10)
-                version = data.ReadU8();
+            else
+                version = data.ReadVersionNumber();
             stateFlags = data.ReadU8();
             fieldInhibitFlags = data.ReadU32();
             if(ele.majorVersion == 10)

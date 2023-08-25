@@ -20,6 +20,7 @@ namespace DLAT.JTReader {
         }
         public int majorVersion;
         public int minorVersion;
+        public readonly int byteOrder;
         
         public Stream fileStream;
         public List<DataSegment> segments;
@@ -39,8 +40,8 @@ namespace DLAT.JTReader {
 
             Console.WriteLine("JT File Version " + Version);
 
-            var byteOrder = fileStream.ReadU8();
-            fileStream.ByteOrder(byteOrder);
+            byteOrder = fileStream.ReadU8();
+            fileStream.FromJTFile(this);
             if (byteOrder == 1)
                 throw new Exception("This file saved as big endian. Doesn't support yet.");
             var emptyField = fileStream.ReadI32();

@@ -11,10 +11,8 @@ namespace DLAT.JTReader {
         public GeometricTransformAttributeData(Element ele) : base(ele) {
             var data = ele.dataStream;
             short version = 0;
-            if (ele.majorVersion == 9)
-                version = data.ReadI16();
-            else if (ele.majorVersion == 10)
-                version = data.ReadU8();
+            if (ele.majorVersion > 8)
+                version = data.ReadVersionNumber();
             ushort storedValuesMask = data.ReadU16();
             matrix = ele.majorVersion < 10 ? new Mx4F32(data,storedValuesMask).ToMx4F64() : new Mx4F64(data, storedValuesMask);
             base.ReadBaseAttributeDataFields2(data);

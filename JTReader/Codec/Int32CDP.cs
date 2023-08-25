@@ -24,8 +24,6 @@ namespace DLAT.JTReader {
         public const int CODECTYPE_HUFFMAN = 2;
         public const int CODECTYPE_ARITHMETIC = 3;
 
-        
-
         public static int[] DecodeBytes(Stream data) {
             byte codecType = data.ReadU8();
             int[] decodedSymbols;
@@ -48,7 +46,7 @@ namespace DLAT.JTReader {
             int symbolCount;
 
             if (codecType == CODECTYPE_HUFFMAN || codecType == CODECTYPE_ARITHMETIC) {
-                int32ProbabilityContexts = new Int32ProbabilityContexts(data, 8);
+                int32ProbabilityContexts = new Int32ProbabilityContexts(data);
                 outOfBandValueCount = data.ReadI32();
                 if (outOfBandValueCount > 0)
                     outOfBandValues = DecodeBytes(data);
@@ -64,7 +62,7 @@ namespace DLAT.JTReader {
             byte[] codeText = new byte[intsToRead * 4];
             for (int i = 0; i < intsToRead; i++) {
                 byte[] buffer = data.ReadBytes(4);
-                if(data.ByteOrder() == 0){
+                if(data.FromJTFile().byteOrder == 0){
                     codeText[i * 4] = buffer[3];
                     codeText[(i * 4) + 1] = buffer[2];
                     codeText[(i * 4) + 2] = buffer[1];
@@ -108,14 +106,25 @@ namespace DLAT.JTReader {
             return decodedSymbols;
         }
         public static List<int> ReadVecI32(Stream data, PredictorType predictorType) {
-            List<int> decodedSymbols = new List<int>(DecodeBytes(data));
-            List<int> unpackedList = UnpackResiduals(decodedSymbols, predictorType);
+            var decodedSymbols = new List<int>();
+            switch (data.FromJTFile().majorVersion) {
+                case 8:
+                    decodedSymbols.AddRange(DecodeBytes(data));
+                    break;
+                case 9:
+                    decodedSymbols.AddRange(Int32CDP2.DecodeBytes(data));
+                    break;
+                default:
+                    decodedSymbols.AddRange(Int32CDP3.DecodeBytes(data));
+                    break;
+            }
+
+            var unpackedList = UnpackResiduals(decodedSymbols, predictorType);
             return unpackedList;
         }
         public static List<int> ReadVecU32(Stream data, PredictorType predictorType) {
-            List<int> decodedSymbols = new List<int>(DecodeBytes(data));
-            List<int> unpackedList = UnpackResiduals(decodedSymbols, predictorType);
-            for (int i = 0; i < unpackedList.Count; i++) {
+            var unpackedList = ReadVecI32(data, predictorType);
+            for (var i = 0; i < unpackedList.Count; i++) {
                 unpackedList[i] = unpackedList[i] & 0xffff;
             }
             return unpackedList;
@@ -152,12 +161,6 @@ namespace DLAT.JTReader {
                     return index;
             }
         }
-        /**
-	     * Unpacks the list of decoded symbols.
-	     * @param  residuals     List of decoded symbols
-	     * @param  predictorType Predictor type
-	     * @return               List of unpackages integer values
-	     */
         public static List<int> UnpackResiduals(List<int> residuals, PredictorType predictorType) {
             int iPredicted;
             int len = residuals.Count;
@@ -192,13 +195,14 @@ namespace DLAT.JTReader {
         }
     }
     public class Int32ProbabilityContexts {
+        public bool hasOutOfBandValues;
         public List<Int32ProbabilityContextTableEntry>[] int32ProbabilityContextTableEntries;
-        public Int32ProbabilityContexts(Stream data, int majorVersion) {
-            if (majorVersion < 9) {
-                ReadMk1(data);
-            }
-            else {
-                ReadMk2(data);
+        public Int32ProbabilityContexts(Stream data) {
+            hasOutOfBandValues = false;
+            switch (data.FromJTFile().majorVersion) {
+                case 8:  ReadMk1(data); break;
+                case 9:  ReadMk2(data); break;
+                case 10: ReadMk3(data); break;
             }
         }
 
@@ -231,6 +235,8 @@ namespace DLAT.JTReader {
                     else
                         entry.associatedValue = symbol2AssociatedValue[entry.symbol];
                     int32ProbabilityContextTableEntries[i].Add(entry);
+                    if (entry.symbol == -2)
+                        hasOutOfBandValues = true;
                 }
             }
         }
@@ -254,13 +260,43 @@ namespace DLAT.JTReader {
                             numberValueBits, -1, minValue);
 	
                     int32ProbabilityContextTableEntries[i].Add(int32ProbabilityContextTableEntry);
+                    if (int32ProbabilityContextTableEntry.symbol == -2)
+                        hasOutOfBandValues = true;
                 }
             }
 
-            var bitsToSkip = (int)bitBuffer.Position % 8;
-            if(bitsToSkip > 0){
-                bitBuffer.ReadI32((8 - bitsToSkip));
+            // var bitsToSkip = (int)bitBuffer.Position % 8;
+            // if(bitsToSkip > 0){
+            //     bitBuffer.ReadI32((8 - bitsToSkip));
+            // }
+        }
+        public void ReadMk3(Stream data) {
+            var bitBuffer = new BitStream(data);
+
+            var probabilityContextTableEntryCount = bitBuffer.ReadU32(16);
+            var numberOccurrenceCountBits = bitBuffer.ReadU32(6);
+            var numberValueBits = bitBuffer.ReadU32(7);
+            var minValue = bitBuffer.ReadI32(32);
+            //v10 int, v10.5 uint
+
+            int32ProbabilityContextTableEntries = new List<Int32ProbabilityContextTableEntry>[1];
+            for(var i = 0; i < int32ProbabilityContextTableEntries.Length; i++){
+                int32ProbabilityContextTableEntries[i] = new List<Int32ProbabilityContextTableEntry>();
+
+                for(var j = 0; j < probabilityContextTableEntryCount; j++) {
+                    var int32ProbabilityContextTableEntry = new
+                        Int32ProbabilityContextTableEntry(bitBuffer, -1, numberOccurrenceCountBits,
+                            numberValueBits, -1, minValue);
+                    int32ProbabilityContextTableEntries[i].Add(int32ProbabilityContextTableEntry);
+                    if (int32ProbabilityContextTableEntry.symbol == -2)
+                        hasOutOfBandValues = true;
+                }
             }
+
+            // var bitsToSkip = (int)bitBuffer.Position % 8;
+            // if(bitsToSkip > 0){
+            //     bitBuffer.ReadI32((8 - bitsToSkip));
+            // }
         }
     }
     public class Int32ProbabilityContextTableEntry {
@@ -271,11 +307,18 @@ namespace DLAT.JTReader {
         public Int32ProbabilityContextTableEntry(BitStream bitStream,
             int symbolBits, int occurrenceCountBits,
             int valueBits, int nextContextBits, int minValue) {
-            symbol = bitStream.ReadU32(symbolBits) - 2;
+            if(symbolBits != -1)
+                symbol = bitStream.ReadU32(symbolBits) - 2;
+            else {
+                symbol = (bitStream.ReadI32(1) == 0 ? 0 : -2);
+            }
             occurrenceCount = bitStream.ReadU32(occurrenceCountBits);
             associatedValue = bitStream.ReadU32(valueBits) + minValue;
-            nextContext = bitStream.ReadU32(nextContextBits);
+            if(nextContextBits != -1)
+                nextContext = bitStream.ReadU32(nextContextBits);
         }
+        
+        
     }
     public class CodecDriver {
         public byte[] codeTextBytes;

@@ -7,6 +7,14 @@ namespace DLAT.JTReader {
         public List<double> vertexCoordinates;
 
         public CompressedVertexCoordinateArray(Stream data) {
+            if (data.FromJTFile().majorVersion == 9)
+                ReadV9(data);
+            else
+                ReadV10(data);
+
+        }
+
+        void ReadV9(Stream data) {
             int uniqueVertexCount = data.ReadI32();
             int numberComponents = data.ReadU8();
             PointQuantizerData pointQuantizerData = new PointQuantizerData(data);
@@ -18,8 +26,8 @@ namespace DLAT.JTReader {
             int numberOfBits = pointQuantizerData.numberOfBits;
             if (numberOfBits == 0) {
                 for (int i = 0; i < numberComponents; i++) {
-                    List<int> exponents = Int32CDP2.ReadVecI32(data, PredictorType.PredLag1);
-                    List<int> mantissae = Int32CDP2.ReadVecI32(data, PredictorType.PredLag1);
+                    List<int> exponents = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
+                    List<int> mantissae = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
                     List<int> codeData = new List<int>();
                     for (int j = 0; j < exponents.Count; j++)
                         codeData.Add((exponents[j] << 23) | mantissae[j]);
@@ -38,10 +46,10 @@ namespace DLAT.JTReader {
                 }
             }
             else if (numberOfBits > 0) {
-                vertexCoordCodeLists.Add(Int32CDP2.ReadVecI32(data, PredictorType.PredLag1));
-                vertexCoordCodeLists.Add(Int32CDP2.ReadVecI32(data, PredictorType.PredLag1));
-                vertexCoordCodeLists.Add(Int32CDP2.ReadVecI32(data, PredictorType.PredLag1));
-
+                vertexCoordCodeLists.Add(Int32CDP.ReadVecU32(data, PredictorType.PredLag1));
+                vertexCoordCodeLists.Add(Int32CDP.ReadVecU32(data, PredictorType.PredLag1));
+                vertexCoordCodeLists.Add(Int32CDP.ReadVecU32(data, PredictorType.PredLag1));
+                
                 List<Double> xValues =
                     CODEC.Dequantize(vertexCoordCodeLists[0], pointQuantizerData.xRange, numberOfBits);
                 List<Double> yValues =
@@ -57,7 +65,46 @@ namespace DLAT.JTReader {
             else {
                 throw new Exception("ERROR: Negative number of quantized bits: " + numberOfBits);
             }
+            
+            long readHash = data.ReadU32();
+        }
 
+        void ReadV10(Stream data) {
+            int uniqueVertexCount = data.ReadI32();
+            int numberComponents = data.ReadU8();
+            PointQuantizerData pointQuantizerData = new PointQuantizerData(data);
+            
+            vertexCoordinates = new List<double>();
+            int numberOfBits = pointQuantizerData.numberOfBits;
+            if (numberOfBits == 0) {
+                var binaryVertexCoords = new List<int>[numberComponents];
+                for (int i = 0; i < numberComponents; i++) {
+                    binaryVertexCoords[i] = Int32CDP.ReadVecU32(data, PredictorType.PredLag1);
+                }
+
+            }
+            else if (numberOfBits > 0) {
+                var vertexCoordCodeLists = new List<int>[3];
+                vertexCoordCodeLists[0] = Int32CDP.ReadVecU32(data, PredictorType.PredLag1);
+                vertexCoordCodeLists[1] = Int32CDP.ReadVecU32(data, PredictorType.PredLag1);
+                vertexCoordCodeLists[2] = Int32CDP.ReadVecU32(data, PredictorType.PredLag1);
+                
+                List<Double> xValues =
+                    CODEC.Dequantize(vertexCoordCodeLists[0], pointQuantizerData.xRange, numberOfBits);
+                List<Double> yValues =
+                    CODEC.Dequantize(vertexCoordCodeLists[1], pointQuantizerData.yRange, numberOfBits);
+                List<Double> zValues =
+                    CODEC.Dequantize(vertexCoordCodeLists[2], pointQuantizerData.zRange, numberOfBits);
+                for (int i = 0; i < xValues.Count; i++) {
+                    vertexCoordinates.Add(xValues[i]);
+                    vertexCoordinates.Add(yValues[i]);
+                    vertexCoordinates.Add(zValues[i]);
+                }
+            }
+            else {
+                throw new Exception("ERROR: Negative number of quantized bits: " + numberOfBits);
+            }
+            
             long readHash = data.ReadU32();
         }
     }
@@ -65,6 +112,14 @@ namespace DLAT.JTReader {
         public List<double> normalCoordinates;
 
         public CompressedVertexNormalArray(Stream data) {
+            if(data.FromJTFile().majorVersion == 9)
+                ReadV9(data);
+            else {
+                ReadV10(data);
+            }
+        }
+
+        public void ReadV9(Stream data) {
             var normalCount = data.ReadI32();
             var numberComponents = data.ReadU8();
             var quantizationBits = data.ReadU8();
@@ -80,8 +135,8 @@ namespace DLAT.JTReader {
 
             if (quantizationBits == 0) {
                 for (int i = 0; i < numberComponents; i++) {
-                    List<int> exponents = Int32CDP2.ReadVecI32(data, PredictorType.PredNull);
-                    List<int> mantissae = Int32CDP2.ReadVecI32(data, PredictorType.PredNull);
+                    List<int> exponents = Int32CDP.ReadVecI32(data, PredictorType.PredNull);
+                    List<int> mantissae = Int32CDP.ReadVecI32(data, PredictorType.PredNull);
 
                     List<int> normalVectorData = new List<int>();
                     for (int j = 0; j < exponents.Count; j++) {
@@ -103,10 +158,10 @@ namespace DLAT.JTReader {
                 }
             }
             else if (quantizationBits > 0) {
-                sextantCodes = Int32CDP2.ReadVecI32(data, PredictorType.PredNull);
-                octantCodes = Int32CDP2.ReadVecI32(data, PredictorType.PredNull);
-                thetaCodes = Int32CDP2.ReadVecI32(data, PredictorType.PredNull);
-                psiCodes = Int32CDP2.ReadVecI32(data, PredictorType.PredNull);
+                sextantCodes = Int32CDP.ReadVecI32(data, PredictorType.PredNull);
+                octantCodes  = Int32CDP.ReadVecI32(data, PredictorType.PredNull);
+                thetaCodes   = Int32CDP.ReadVecI32(data, PredictorType.PredNull);
+                psiCodes     = Int32CDP.ReadVecI32(data, PredictorType.PredNull);
 
                 var deeringCodec = new CODEC.DeeringNormalCodec(quantizationBits);
                 for (int i = 0; i < psiCodes.Count; i++) {
@@ -122,8 +177,25 @@ namespace DLAT.JTReader {
             }
 
             var hash = data.ReadU32();
-
         }
+
+        public void ReadV10(Stream data) {
+            var normalCount = data.ReadI32();
+            var numberComponents = data.ReadU8();
+            var quantizationBits = data.ReadU8();
+
+            if (quantizationBits == 0) {
+                var binaryVertexNormals = new List<int>[numberComponents];
+                for (int i = 0; i < numberComponents; ++i)
+                    binaryVertexNormals[i] = Int32CDP.ReadVecU32(data, PredictorType.PredNull);
+            }
+            else {
+                var deeringNormalCodes = Int32CDP.ReadVecU32(data, PredictorType.PredNull);
+            }
+
+            var hash = data.ReadU32();
+        }
+        
     }
     public class CompressedVertexColorArray {
         public List<double> colorValues;
@@ -144,8 +216,8 @@ namespace DLAT.JTReader {
 
             if (quantizationBits == 0) {
                 for (int i = 0; i < numberComponents; i++) {
-                    List<int> exponents = Int32CDP2.ReadVecI32(data, PredictorType.PredLag1);
-                    List<int> mantissae = Int32CDP2.ReadVecI32(data, PredictorType.PredLag1);
+                    List<int> exponents = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
+                    List<int> mantissae = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
 
                     List<int> codeData = new List<int>();
                     for (int j = 0; j < exponents.Count; j++)
@@ -169,10 +241,10 @@ namespace DLAT.JTReader {
             else {
                 var colorQuantizerData = new ColorQuantizerData(data);
 
-                hueRedCodes = Int32CDP2.ReadVecI32(data, PredictorType.PredLag1);
-                satGreenCodes = Int32CDP2.ReadVecI32(data, PredictorType.PredLag1);
-                valueBlueCodes = Int32CDP2.ReadVecI32(data, PredictorType.PredLag1);
-                alphaCodes = Int32CDP2.ReadVecI32(data, PredictorType.PredLag1);
+                hueRedCodes    = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
+                satGreenCodes  = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
+                valueBlueCodes = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
+                alphaCodes     = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
 
                 List<Double> redValues = CODEC.Dequantize(hueRedCodes, colorQuantizerData.rRange, quantizationBits);
                 List<Double> greenValues = CODEC.Dequantize(satGreenCodes, colorQuantizerData.gRange, quantizationBits);
@@ -204,8 +276,8 @@ namespace DLAT.JTReader {
 
 		    if(quantizationBits == 0){
 			    for(int i = 0; i < numberComponents; i++){
-				    List<int> exponents = Int32CDP2.ReadVecI32(data, PredictorType.PredNull);
-				    List<int> mantissae = Int32CDP2.ReadVecI32(data, PredictorType.PredNull);
+				    List<int> exponents = Int32CDP.ReadVecI32(data, PredictorType.PredNull);
+				    List<int> mantissae = Int32CDP.ReadVecI32(data, PredictorType.PredNull);
 
 				    List<int> codeData = new List<int>();
 				    for(int j = 0; j < exponents.Count; j++){
@@ -228,7 +300,7 @@ namespace DLAT.JTReader {
 			    textureQuantizerData = new TextureQuantizerData(data, numberComponents);
 
 			    for(int i = 0; i < numberComponents; i++){
-				    textureCoordCodesLists.Add(Int32CDP2.ReadVecU32(data, PredictorType.PredLag1));
+				    textureCoordCodesLists.Add(Int32CDP.ReadVecU32(data, PredictorType.PredLag1));
 			    }
 
 			    List<Double> uValues = CODEC.Dequantize(textureCoordCodesLists[0], textureQuantizerData.uRange, quantizationBits);
@@ -249,7 +321,7 @@ namespace DLAT.JTReader {
 
         public CompressedVertexFlagArray(Stream data) {
             var count = data.ReadI32();
-            vertexFlags = Int32CDP2.ReadVecU32(data, PredictorType.PredNull);
+            vertexFlags = Int32CDP.ReadVecU32(data, PredictorType.PredNull);
         }
     }
     

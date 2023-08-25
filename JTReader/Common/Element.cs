@@ -37,7 +37,7 @@ namespace DLAT.JTReader {
             //Debug.cache = true;
             
             dataStream = new MemoryStream(stream.ReadBytes(elementLength - (int)(stream.Position - begin), 1));
-            dataStream.ByteOrder(stream.ByteOrder());
+            dataStream.FromJTFile(stream.FromJTFile());
             dataStream.Position = 0;
             var elementType = ObjectTypeIdentifiers.types[objectTypeID.ToString()];
 
@@ -58,8 +58,8 @@ namespace DLAT.JTReader {
                         ? $"#yElement data not fully read! Remain:{dataStream.Length - dataStream.Position - 1}#w"
                         : "#rElement data over read!#w", 2);
             }
-            catch {
-                Debug.Log("#rRead failed.#w", 2);
+            catch (Exception e){
+                Debug.Log($"#rRead failed. {e.Message}#w", 2);
             }
             
         }

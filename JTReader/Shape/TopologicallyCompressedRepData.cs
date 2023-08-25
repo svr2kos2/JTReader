@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -18,26 +19,30 @@ namespace DLAT.JTReader {
 
         public TopologicallyCompressedRepData(Element ele) {
             var data = ele.dataStream;
+
             faceDegress = new List<int[]>();
             for (int i = 0; i < 8; ++i) 
-                faceDegress.Add(Int32CDP2.ReadVecI32(data, PredictorType.PredNull).ToArray());
-            vertexValences = Int32CDP2.ReadVecI32(data, PredictorType.PredNull);
-            vertexGroups = Int32CDP2.ReadVecI32(data, PredictorType.PredNull);
-            vertexFlags = Int32CDP2.ReadVecI32(data, PredictorType.PredLag1);
+                faceDegress.Add(Int32CDP.ReadVecI32(data, PredictorType.PredNull).ToArray());
+            vertexValences = Int32CDP.ReadVecI32(data, PredictorType.PredNull);
+            vertexGroups   = Int32CDP.ReadVecI32(data, PredictorType.PredNull);
+            vertexFlags    = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
             
             faceAttributeMasks30LSBs = new List<int[]>();
             for(int i = 0; i < 8; i++) {
-                faceAttributeMasks30LSBs.Add(Int32CDP2.ReadVecI32(data, PredictorType.PredNull).ToArray());
+                faceAttributeMasks30LSBs.Add(Int32CDP.ReadVecI32(data, PredictorType.PredNull).ToArray());
             }
 
-            faceAttributeMasks8_30nextMSBs = Int32CDP2.ReadVecI32(data, PredictorType.PredNull);
-            faceAttributeMask8_4MSBs = Int32CDP2.ReadVecI32(data, PredictorType.PredNull);
+            faceAttributeMasks8_30nextMSBs = Int32CDP.ReadVecI32(data, PredictorType.PredNull);
+            if(ele.majorVersion == 9)
+                faceAttributeMask8_4MSBs = Int32CDP.ReadVecI32(data, PredictorType.PredNull);
             highDegreeFaceAttributeMasks = data.ReadVecU32();
-            List<int> splitFaceSyms = Int32CDP2.ReadVecI32(data, PredictorType.PredLag1);
-            List<int> splitFacePositions = Int32CDP2.ReadVecI32(data, PredictorType.PredNull);
+            List<int> splitFaceSyms      = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
+            List<int> splitFacePositions = Int32CDP.ReadVecI32(data, PredictorType.PredNull);
 
             long readHash = data.ReadU32();
-
+            
+            Debug.Log("#gTopologicallyCompressedRepData Loaded.#w");
+            
             vertexRecords = new TopologicallyCompressedVertexRecords(data);
         }
         

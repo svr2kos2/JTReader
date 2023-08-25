@@ -91,6 +91,7 @@
     <Compile Include="Codec\HuffmanDecoder.cs" />
     <Compile Include="Codec\Int32CDP.cs" />
     <Compile Include="Codec\Int32CDP2.cs" />
+    <Compile Include="Codec\Int32CDP3.cs" />
     <Compile Include="Common\DataSegment.cs" />
     <Compile Include="Common\Element.cs" />
     <Compile Include="Debug.cs" />

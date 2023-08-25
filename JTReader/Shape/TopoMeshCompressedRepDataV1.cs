@@ -26,11 +26,11 @@ namespace DLAT.JTReader {
 
             faceGroupListIndices = null;
             if (isPolyLineShape) {
-                faceGroupListIndices = Int32CDP2.ReadVecI32(data, PredictorType.PredNull);
+                faceGroupListIndices = Int32CDP.ReadVecI32(data, PredictorType.PredNull);
             }
 
-            primitiveListIndices = Int32CDP2.ReadVecI32(data, PredictorType.PredNull);
-            vertexListIndices = Int32CDP2.ReadVecI32(data, PredictorType.PredNull);
+            primitiveListIndices = Int32CDP.ReadVecI32(data, PredictorType.PredNull);
+            vertexListIndices = Int32CDP.ReadVecI32(data, PredictorType.PredNull);
 
             int fgpvListIndicesHash = data.ReadI32();
             ulong vertexBindings = data.ReadU64();
@@ -44,7 +44,7 @@ namespace DLAT.JTReader {
 
             int numberOfUniqueVertexCoordinates = data.ReadI32();
 
-            List<int> uniqueVertexCoordinateLengthList = Int32CDP2.ReadVecI32(data, PredictorType.PredNull);
+            List<int> uniqueVertexCoordinateLengthList = Int32CDP.ReadVecI32(data, PredictorType.PredNull);
 
             int uniqueVertexListMapHash = data.ReadI32();
 

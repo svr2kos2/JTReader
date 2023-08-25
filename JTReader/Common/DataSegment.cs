@@ -89,7 +89,7 @@ namespace DLAT.JTReader {
             if(!compressed) 
                 dataStream = new MemoryStream(fs.ReadBytes((int)segmentLength - 24));
 
-            dataStream.ByteOrder(fs.ByteOrder());
+            dataStream.FromJTFile(jtFile);
             fs.Position = TOCEndPosition;
 
             Debug.Log("Segment type(#b" +

@@ -11,8 +11,8 @@ namespace DLAT.JTReader {
         public float linearAttenuation;
         public float quadraticAttenuation;
         public AttenuationCoefficients(Stream data) {
-            constantAttenuation = data.ReadF32();
-            linearAttenuation = data.ReadF32();
+            constantAttenuation  = data.ReadF32();
+            linearAttenuation    = data.ReadF32();
             quadraticAttenuation = data.ReadF32();
         }
 

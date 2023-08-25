@@ -82,7 +82,9 @@ namespace DLAT.JTReader {
             int[] newSymbolRange = new int[3];
             int outOfBandDataCounter = 0;
 
-            List<int> outOfBandValues = new List<int>(codecDriver.outOfBandValues);
+            var outOfBandValues = new List<int>();
+            if (codecDriver.outOfBandValues != null)
+                outOfBandValues.AddRange(codecDriver.outOfBandValues);
 
             int[] results = codecDriver.GetNextCodeText();
             if (results == null) {
@@ -94,7 +96,7 @@ namespace DLAT.JTReader {
 
             code = (bitBuffer >> 16) & 0xffff;
             bitBuffer <<= 16;
-            bits = 16;
+            bits -= 16;
 
             for (int i = 0; i < symbolCount; i++) {
                 int rescaledCode = (((((code - low) + 1) * accumProbCounts.getTotalSymbolCount(currentContext) - 1)) / ((high - low) + 1));
