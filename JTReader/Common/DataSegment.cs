@@ -29,15 +29,6 @@ namespace DLAT.JTReader {
                 return file.minorVersion;
             }
         }
-
-        public void InstantiateElements() {
-            if (elements == null)
-                return;
-            foreach (var element in elements) {
-                element.Instantiate();
-            }
-        }
-
         
         public DataSegment(JTFile jtFile, int segIndex) {
             file = jtFile;
@@ -82,7 +73,7 @@ namespace DLAT.JTReader {
                     compressed = true;
                     dataStream = DecompressLZMA(new MemoryStream(fb, (int)pos, compressedLength));
                 } else
-                    throw new Exception("unknow compress method");
+                    throw new Exception("unknown compress method");
             }
             if(!compressed) 
                 dataStream = new MemoryStream(fb, (int)pos,(int)segmentLength - 24);

@@ -5,6 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace DLAT.JTReader {
-    internal class VertexShaderAttributeData {
+    public class VertexShaderAttributeData : BaseAttributeData {
+        public BaseShaderData shaderData;
+        public VertexShaderAttributeData(Element ele) : base(ele) {
+            var data = ele.dataStream;
+            shaderData = new BaseShaderData(data);
+            var version = data.ReadVersionNumber();
+        }
     }
 }

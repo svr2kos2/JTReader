@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace DLAT.JTReader {
-    public class WireHarnessSetShapeNodeData : VertexShapeNodeData {
+    public class WireHarnessSetShapeNodeData : BaseShapeNodeData {
         public WireHarnessSetShapeNodeData(Element ele) : base(ele) { }
     }
 }

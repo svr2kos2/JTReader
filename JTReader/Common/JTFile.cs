@@ -74,8 +74,6 @@ namespace DLAT.JTReader {
             segments = new List<DataSegment>();
             for (int i = 0; i < entryCount; ++i) {
                 var seg = new DataSegment(this, i);
-                //seg.InstantiateElements();
-                //seg.InitializeElements();
                 if(seg.dataStream != null)
                     segments.Add(seg);
             }

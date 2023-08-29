@@ -5,6 +5,15 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace DLAT.JTReader {
-    internal class WireHarnessSetShapeData {
+    public class WireHarnessSetShapeData {
+        public byte version;
+        public int normalBinding;
+        public int textureCoordBinding;
+        public int colorBinding;
+
+        public WireHarnessSetShapeData(Element ele) {
+            
+        }
+        
     }
 }
