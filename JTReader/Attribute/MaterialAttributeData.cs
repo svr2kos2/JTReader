@@ -21,16 +21,16 @@ namespace DLAT.JTReader {
             switch (ele.majorVersion) {
                 case 8:
                     dataFlags = data.ReadU16();
-                    if ((stateFlags & 0x1) == 0)
+                    if ((dataFlags & 0x2) == 0)
                         ambientColor = new RGBA(data);
                     else
                         ambientColor = new RGBA(data.ReadF32());
                     diffuseColor = new RGBA(data);
-                    if ((stateFlags & 0x4) == 0)
+                    if ((dataFlags & 0x8) == 0)
                         specularColor = new RGBA(data);
                     else
                         specularColor = new RGBA(data.ReadF32());
-                    if ((stateFlags & 0x8) == 0)
+                    if ((dataFlags & 0x4) == 0)
                         emissionColor = new RGBA(data);
                     else
                         emissionColor = new RGBA(data.ReadF32());
@@ -39,12 +39,12 @@ namespace DLAT.JTReader {
                 case 9:
                     version = data.ReadI16();
                     dataFlags = data.ReadU16();
-                    ambientColor = new RGBA(data);
-                    diffuseColor = new RGBA(data);
-                    specularColor = new RGBA(data);
-                    emissionColor = new RGBA(data);
+                    ambientColor = version == 2 ? new RGBA(data.ReadF32()):new RGBA(data);
+                    diffuseColor = version == 2 ? new RGBA(data.ReadF32()):new RGBA(data);
+                    specularColor = version == 2 ? new RGBA(data.ReadF32()):new RGBA(data);
+                    emissionColor = version == 2 ? new RGBA(data.ReadF32()):new RGBA(data);
                     shiniess = data.ReadF32();
-                    if(version == 0)
+                    if(version == 2)
                         reflectivity = data.ReadF32();
                     break;
                 case 10:

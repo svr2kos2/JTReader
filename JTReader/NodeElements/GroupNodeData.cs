@@ -18,7 +18,7 @@ namespace DLAT.JTReader {
             childNodeObjectID = new int[childCount];
             for (int i = 0; i < childCount; ++i) {
                 childNodeObjectID[i] = data.ReadI32();
-                Debug.Log("Child:" + childNodeObjectID[i], 2);
+                //Debug.Log("Child:" + childNodeObjectID[i], 2);
             }
         }
     }

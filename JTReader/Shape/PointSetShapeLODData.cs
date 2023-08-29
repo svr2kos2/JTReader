@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace DLAT.JTReader {
     public class PointSetShapeLODData {
-        
-        
+        public PointSetShapeLODData(Element ele) { }
     }
 }

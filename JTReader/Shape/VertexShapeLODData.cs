@@ -45,7 +45,7 @@ namespace DLAT.JTReader {
                     topoMeshTopologicallyCompressedLODData = new TopoMeshTopologicallyCompressedLODData(ele);
                 } else {
                     // Skip two unknown bytes
-                    data.ReadBytes(2);
+                    //data.ReadBytes(2);
                     topoMeshCompressedLODData = new TopoMeshCompressedLODData(ele);
                 }
             }

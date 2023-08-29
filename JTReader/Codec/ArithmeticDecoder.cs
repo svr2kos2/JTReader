@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,8 +14,9 @@ namespace DLAT.JTReader {
             private List<int> _symbolsCounts;
 
             /** Accumulated occurence counts */
-            private List<SortedDictionary<int, int>> _entryByAccumCountPerContext;
-
+            //private List<SortedDictionary<int, int>> _entryByAccumCountPerContext;
+            private List<List<(int,int)>> _entryByAccumCountPerContext2;
+            
             /**
              * Constructor.
              * @param int32ProbabilityContexts Probability contexts
@@ -23,20 +24,54 @@ namespace DLAT.JTReader {
             public AccumulatedProbabilityCounts(Int32ProbabilityContexts int32ProbabilityContexts) {
                 _int32ProbabilityContexts = int32ProbabilityContexts;
                 _symbolsCounts = new List<int>();
-                _entryByAccumCountPerContext = new List<SortedDictionary<int, int>>();
+                //_entryByAccumCountPerContext = new List<SortedDictionary<int, int>>();
+                _entryByAccumCountPerContext2 = new List<List<(int, int)>>();
 
                 for (int i = 0; i < _int32ProbabilityContexts.int32ProbabilityContextTableEntries.Length; i++) {
                     int accumulatedCount = 0;
-                    _entryByAccumCountPerContext.Add(new SortedDictionary<int, int>());
+                    //_entryByAccumCountPerContext.Add(new SortedDictionary<int, int>());
+                    _entryByAccumCountPerContext2.Add(new List<(int, int)>());
                     for (int j = 0; j < _int32ProbabilityContexts.int32ProbabilityContextTableEntries[i].Count; j++) {
                         Int32ProbabilityContextTableEntry int32ProbabilityContextTableEntry = _int32ProbabilityContexts.int32ProbabilityContextTableEntries[i][j];
                         accumulatedCount += (int)int32ProbabilityContextTableEntry.occurrenceCount;
-                        _entryByAccumCountPerContext[i].Add((accumulatedCount - 1), j);
+                        //_entryByAccumCountPerContext[i].Add((accumulatedCount - 1), j);
+                        _entryByAccumCountPerContext2[i].Add((accumulatedCount - 1, j));
                     }
+
+                    _entryByAccumCountPerContext2[i].Sort((x, y) => x.Item1.CompareTo(y.Item1));
                     _symbolsCounts.Add(accumulatedCount);
                 }
             }
 
+            // int lower_bound(List<(int, int)> list, int key) {
+            //     var low = 0;
+            //     var high = list.Count - 1;
+            //     while (low < high) {
+            //         var mid = (low + high) / 2;
+            //         if (list[mid].Item1 < key)
+            //             low = mid + 1;
+            //         else
+            //             high = mid;
+            //     }
+            //     
+            //     return low;
+            // }
+            
+            int upper_bound(List<(int, int)> list, int key) {
+                var low = 0;
+                var high = list.Count - 1;
+                while (low < high) {
+                    var mid = (low + high) / 2;
+                    if (list[mid].Item1 <= key)
+                        low = mid + 1;
+                    else
+                        high = mid;
+                }
+                if (list[low].Item1 <= key)
+                    low++;
+                return low;
+            }
+            
             /**
              * Returns the entry and symbol range.
              * @param  contextIndex   Context index
@@ -45,10 +80,16 @@ namespace DLAT.JTReader {
              * @return                Matching probability context table entry
              */
             public Int32ProbabilityContextTableEntry getEntryAndSymbolRangeByRescaledCode(int contextIndex, int rescaledCode, int[] newSymbolRange) {
-                SortedDictionary<int, int> treeMap = _entryByAccumCountPerContext[contextIndex];
+                //SortedDictionary<int, int> treeMap = _entryByAccumCountPerContext[contextIndex];
+                var treeMap2 = _entryByAccumCountPerContext2[contextIndex];
+                
+                //int key = treeMap.Keys.FirstOrDefault(k => k > rescaledCode - 1);
+                //int value = _entryByAccumCountPerContext[contextIndex][key];
 
-                int key = treeMap.Keys.FirstOrDefault(k => k > rescaledCode - 1);
-                int value = _entryByAccumCountPerContext[contextIndex][key];
+                var (key, value) = treeMap2[upper_bound(treeMap2, rescaledCode - 1)];
+
+                // if (key != key2 || value != value2)
+                //     throw new Exception("reconstruct failed.");
 
                 Int32ProbabilityContextTableEntry int32ProbabilityContextTableEntry = _int32ProbabilityContexts.int32ProbabilityContextTableEntries[contextIndex][value];
 

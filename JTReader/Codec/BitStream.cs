@@ -29,26 +29,49 @@ namespace DLAT.JTReader {
             _position = position;
         }
 
-        public int ReadI32(int bitLength) {
-            var res = ReadU32(bitLength);
-            res <<= (32 - bitLength);
-            res >>= (32 - bitLength);
-            return res;
+        public byte[] GetRequredBytes(int bitLnegth) {
+            _byteStream.Position = _position / 8;
+            var bytesLen = (_position + bitLnegth - 1) / 8 - _byteStream.Position + 1;
+            var bytes = new byte[bytesLen];
+            _ = _byteStream.Read(bytes, 0, bytes.Length);
+            return bytes;
         }
+        
         public int ReadU32(int bitLength) {
             if (bitLength < 1)
                 return 0;
             var res = 0;
-            for (int i = 0; i < bitLength; ++i) {
-                res <<= 1;
-                var pos = _position + i;
-                _byteStream.Position = pos / 8;
-                var b = _byteStream.ReadU8();
-                //read from high bit
-                res |= (b & (1 << (int)(7 - (pos % 8)))) == 0 ? 0 : 1;
+            var bytes = GetRequredBytes(bitLength);
+            
+            //read from high to low bit
+            
+            //chop left
+            var left = (byte)(_position % 8);
+            bytes[0] &= (byte)(0xff >> left);
+            //chop right
+            var right = (byte)((8 - (_position + bitLength) % 8)) % 8;
+            bytes[bytes.Length - 1] &= (byte)(0xff << right);
+            bytes[bytes.Length - 1] >>= right;
+            
+            res |= bytes[0];
+            if (bytes.Length != 1) {
+                for (var i = 1; i < bytes.Length - 1; i++) {
+                    res <<= 8;
+                    res |= bytes[i];
+                }
+
+                res <<= (8 - right);
+                res |= bytes[bytes.Length - 1];
             }
+
             _position += bitLength;
             ApplyPositionToByteStream();
+            return res;
+        }
+        public int ReadI32(int bitLength) {
+            var res = ReadU32(bitLength);
+            res <<= (32 - bitLength);
+            res >>= (32 - bitLength);
             return res;
         }
         public float ReadF32(int bitLength) {

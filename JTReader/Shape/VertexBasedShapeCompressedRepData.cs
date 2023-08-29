@@ -25,8 +25,14 @@ namespace DLAT.JTReader {
         public VertexBasedShapeCompressedRepData(Stream data) {
             versionNumber = data.ReadI16();
             normalBinding = data.ReadU8();
+            if (normalBinding > 3)
+                throw new Exception("Found invalid normal binding: " + normalBinding);
             textureCoordBinding = data.ReadU8();
+            if (textureCoordBinding > 3)
+                throw new Exception("Found invalid texture binding: " + textureCoordBinding);
             colorBinding = data.ReadU8();
+            if (colorBinding > 3)
+                throw new Exception("Found invalid color binding: " + colorBinding);
             parameters = new QuantizationParameters(data);
             indices = Int32CDP.ReadVecI32(data, PredictorType.PredStride1);
             if (parameters.bitsPerVertex == 0)

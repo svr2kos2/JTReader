@@ -31,10 +31,10 @@ namespace DLAT.JTReader {
             nodeCountRange = new CountRange(data);
             polygonCountRange = new CountRange(data);
             //if((partitionFlags & 0x00000001) != 0)
-            if(data.Length - data.Position > 48 && (partitionFlags & 0x00000001) != 0)
+            if(data.Length - data.Position >= 24 && (partitionFlags & 0x00000001) != 0)
                 untransformedBBox = new BBoxF32(data);
 
-            Debug.Log("Flag:" + partitionFlags + " FileName:" + fileName, 2);
+            //Debug.Log("Flag:" + partitionFlags + " FileName:" + fileName, 2);
 
         }
 

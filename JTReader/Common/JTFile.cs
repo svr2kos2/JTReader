@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using JTReader.Common;
 
 namespace DLAT.JTReader {
     public class JTFile {
@@ -22,48 +24,75 @@ namespace DLAT.JTReader {
         public int minorVersion;
         public readonly int byteOrder;
         
-        public Stream fileStream;
+        public byte[] fileBytes;
+        public long tocOffset;
+        
         public List<DataSegment> segments;
         public DataSegment LSGSegment;
 
         static bool isXZInited = false;
-
+        
+        public int tocEntryLength = 0;
+        
         public JTFile(string filePath) {
-
-            if(!isXZInited) {
+            var start = DateTime.Now;
+            
+            if(!isXZInited) 
                 InitNativeLibrary();
-                isXZInited = true;
-            }
 
-            fileStream = new FileStream(filePath, FileMode.Open);
-            Version = fileStream.ReadString(80);
+            fileBytes = File.ReadAllBytes(filePath);
+            long filePos = 0;
+            Version = fileBytes.ReadString(ref filePos,80);
 
-            Console.WriteLine("JT File Version " + Version);
-
-            byteOrder = fileStream.ReadU8();
-            fileStream.FromJTFile(this);
+            byteOrder = fileBytes.ReadU8(ref filePos);
             if (byteOrder == 1)
                 throw new Exception("This file saved as big endian. Doesn't support yet.");
-            var emptyField = fileStream.ReadI32();
-            ulong TOCOffset = majorVersion > 9 ? fileStream.ReadU64() : (ulong)fileStream.ReadI32();
-            var LSGSegmentID = new GUID(fileStream);
+            var emptyField = fileBytes.ReadI32(ref filePos);
+            tocOffset = majorVersion > 9 ? fileBytes.ReadI64(ref filePos) : (long)fileBytes.ReadI32(ref filePos);
+            tocEntryLength = majorVersion > 9 ? 32 : 28;
+            var LSGSegmentID = new GUID(fileBytes);
 
-            fileStream.Position = (long)TOCOffset;
-            var entryCount = fileStream.ReadI32();
-            Debug.Log("Segment Count:" + entryCount);
+            filePos = tocOffset;
+            var entryCount = fileBytes.ReadI32(ref filePos);
+            
+            //Debug.Log("Segment Count:" + entryCount);
+            // var segTasks = new List<Task<DataSegment>>();
+            // for (int i = 0; i < entryCount; ++i) {
+            //     var iSeg = i;
+            //     segTasks.Add(Task.Run(() => { return new DataSegment(this, iSeg); }));
+            // }
+            // Task.WaitAll(segTasks.ToArray());
+            // segments = new List<DataSegment>();
+            // foreach (var segTask in segTasks) {
+            //     var seg = segTask.Result;
+            //     //seg.InitializeElements();
+            //     segments.Add(seg);
+            // }
+            Console.WriteLine("v" + Version + " seg:" + entryCount + " " + filePath);
+            
+            
             segments = new List<DataSegment>();
             for (int i = 0; i < entryCount; ++i) {
-                var seg = new DataSegment(this);
-                if(seg.segmentID == LSGSegmentID)
-                    LSGSegment = seg;
-                segments.Add(seg);
+                var seg = new DataSegment(this, i);
+                //seg.InstantiateElements();
+                //seg.InitializeElements();
+                if(seg.dataStream != null)
+                    segments.Add(seg);
             }
-            Debug.Log("#gRead Done!#w");
-            fileStream.Close();
+            fileBytes = null;
+            
+            // foreach (var seg in segments) {
+            //     if(seg.dataStream == null)
+            //         throw new Exception("WTF?!");
+            //     
+            // }
+            Console.WriteLine("t:" + (DateTime.Now - start).TotalSeconds);
+            //Debug.Log("#gRead Done!#w");
         }
 
 
         public static void InitNativeLibrary() {
+            isXZInited = true;
             string arch = null;
             switch (RuntimeInformation.ProcessArchitecture) {
                 case Architecture.X86:
@@ -83,7 +112,7 @@ namespace DLAT.JTReader {
 
             if (!File.Exists(libPath))
                 throw new PlatformNotSupportedException($"Unable to find native library [{libPath}].");
-
+            
             XZInit.GlobalInit(libPath);
         }
 

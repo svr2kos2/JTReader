@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
 namespace DLAT.JTReader {
     public static class StreamReader {
-        private static Dictionary<Stream, JTFile> _fromJTFile = new Dictionary<Stream, JTFile>();
+        private static ConcurrentDictionary<Stream, JTFile> _fromJTFile = new ConcurrentDictionary<Stream, JTFile>();
         public static JTFile FromJTFile(this Stream stream, JTFile setFile = null) {
             if (_fromJTFile.ContainsKey(stream)) {
                 if (setFile == null)
@@ -17,13 +18,19 @@ namespace DLAT.JTReader {
             }
             if (setFile == null)
                 throw new Exception("JTFile order not set");
-            _fromJTFile.Add(stream, setFile);
+            _fromJTFile.TryAdd(stream, setFile);
             return setFile;
         }
+
+        public static void RemoveJTFileBind(this Stream stream) {
+            if (_fromJTFile.ContainsKey(stream))
+                _fromJTFile.TryRemove(stream, out var res);
+        }
+        
         public static byte[] ReadBytes(this Stream stream, int count, int padEnd = 0) {
             var buffer = new byte[count + padEnd];
-            var readed = stream.Read(buffer, 0, count);
-            if (readed < count)
+            var read = stream.Read(buffer, 0, count);
+            if (read < count)
                 throw new Exception("Over read");
             return buffer;
         }

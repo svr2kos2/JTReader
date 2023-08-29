@@ -17,20 +17,24 @@ namespace DLAT.JTReader {
             var isPolyLineShape = ObjectTypeIdentifiers.types[ele.objectTypeID.ToString()] ==
                                   typeof(PolyLineSetShapeLODData);
             int numberOfFaceGroupListIndices = -1;
-            if (isPolyLineShape) {
+            if (isPolyLineShape || ele.minorVersion != 9) 
                 numberOfFaceGroupListIndices = data.ReadI32();
-            }
 
             int numberOfPrimitiveListIndices = data.ReadI32();
             int numberOfVertexListIndices = data.ReadI32();
 
-            faceGroupListIndices = null;
-            if (isPolyLineShape) {
-                faceGroupListIndices = Int32CDP.ReadVecI32(data, PredictorType.PredNull);
-            }
+            faceGroupListIndices = ele.majorVersion < 10?
+                    (isPolyLineShape?
+                        Int32CDP.ReadVecI32(data, PredictorType.PredNull):
+                        null):
+                    Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
 
-            primitiveListIndices = Int32CDP.ReadVecI32(data, PredictorType.PredNull);
-            vertexListIndices = Int32CDP.ReadVecI32(data, PredictorType.PredNull);
+            primitiveListIndices = Int32CDP.ReadVecI32(data, ele.majorVersion < 10?
+                PredictorType.PredNull:
+                PredictorType.PredLag1);
+            vertexListIndices = Int32CDP.ReadVecI32(data, ele.majorVersion < 10?
+                PredictorType.PredNull:
+                PredictorType.PredLag1);
 
             int fgpvListIndicesHash = data.ReadI32();
             ulong vertexBindings = data.ReadU64();
@@ -41,8 +45,9 @@ namespace DLAT.JTReader {
             if (numberOfVertexRecords == 0)
                 return;
 
-
-            int numberOfUniqueVertexCoordinates = data.ReadI32();
+            if (ele.majorVersion < 10) {
+                int numberOfUniqueVertexCoordinates = data.ReadI32();
+            }
 
             List<int> uniqueVertexCoordinateLengthList = Int32CDP.ReadVecI32(data, PredictorType.PredNull);
 
@@ -64,37 +69,43 @@ namespace DLAT.JTReader {
             }
 
             compressedVertexTextureCoordinateArrays = new CompressedVertexTextureCoordinateArray[8];
-            if ((vertexBindings & 0xf00) != 0) { // Check for bits 9-12
-                compressedVertexTextureCoordinateArrays[0] = new CompressedVertexTextureCoordinateArray(data);
-            }
 
-            if ((vertexBindings & 0xf000) != 0) { // Check for bits 13-16
-                compressedVertexTextureCoordinateArrays[1] = new CompressedVertexTextureCoordinateArray(data);
+            for (var i = 0; i < 8; ++i) {
+                if (vertexBindings.TextureCoordinate(i) != 0)
+                    compressedVertexTextureCoordinateArrays[i] = new CompressedVertexTextureCoordinateArray(data);
             }
-
-            if ((vertexBindings & 0xf0000) != 0) { // Check for bits 17-20
-                compressedVertexTextureCoordinateArrays[2] = new CompressedVertexTextureCoordinateArray(data);
-            }
-
-            if ((vertexBindings & 0xf00000) != 0) { // Check for bits 21-24
-                compressedVertexTextureCoordinateArrays[3] = new CompressedVertexTextureCoordinateArray(data);
-            }
-
-            if ((vertexBindings & 0xf000000) != 0) { // Check for bits 25-28
-                compressedVertexTextureCoordinateArrays[4] = new CompressedVertexTextureCoordinateArray(data);
-            }
-
-            if ((vertexBindings & 0xf0000000) != 0) { // Check for bits 29-32
-                compressedVertexTextureCoordinateArrays[5] = new CompressedVertexTextureCoordinateArray(data);
-            }
-
-            if ((vertexBindings & 0xf00000000ul) != 0) { // Check for bits 33-36
-                compressedVertexTextureCoordinateArrays[6] = new CompressedVertexTextureCoordinateArray(data);
-            }
-
-            if ((vertexBindings & 0xf000000000ul) != 0) { // Check for bits 37-40
-                compressedVertexTextureCoordinateArrays[7] = new CompressedVertexTextureCoordinateArray(data);
-            }
+            //
+            // if ((vertexBindings & 0xf00) != 0) { // Check for bits 9-12
+            //     compressedVertexTextureCoordinateArrays[0] = new CompressedVertexTextureCoordinateArray(data);
+            // }
+            //
+            // if ((vertexBindings & 0xf000) != 0) { // Check for bits 13-16
+            //     compressedVertexTextureCoordinateArrays[1] = new CompressedVertexTextureCoordinateArray(data);
+            // }
+            //
+            // if ((vertexBindings & 0xf0000) != 0) { // Check for bits 17-20
+            //     compressedVertexTextureCoordinateArrays[2] = new CompressedVertexTextureCoordinateArray(data);
+            // }
+            //
+            // if ((vertexBindings & 0xf00000) != 0) { // Check for bits 21-24
+            //     compressedVertexTextureCoordinateArrays[3] = new CompressedVertexTextureCoordinateArray(data);
+            // }
+            //
+            // if ((vertexBindings & 0xf000000) != 0) { // Check for bits 25-28
+            //     compressedVertexTextureCoordinateArrays[4] = new CompressedVertexTextureCoordinateArray(data);
+            // }
+            //
+            // if ((vertexBindings & 0xf0000000) != 0) { // Check for bits 29-32
+            //     compressedVertexTextureCoordinateArrays[5] = new CompressedVertexTextureCoordinateArray(data);
+            // }
+            //
+            // if ((vertexBindings & 0xf00000000ul) != 0) { // Check for bits 33-36
+            //     compressedVertexTextureCoordinateArrays[6] = new CompressedVertexTextureCoordinateArray(data);
+            // }
+            //
+            // if ((vertexBindings & 0xf000000000ul) != 0) { // Check for bits 37-40
+            //     compressedVertexTextureCoordinateArrays[7] = new CompressedVertexTextureCoordinateArray(data);
+            // }
 
             compressedVertexFlagArray = null;
             if ((vertexBindings & 0x8000000000000000ul) != 0) { // Check for bit 64

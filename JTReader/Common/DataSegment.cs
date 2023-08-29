@@ -7,6 +7,7 @@ using System.IO.Compression;
 using System.Runtime.InteropServices.ComTypes;
 using Joveler.Compression.XZ;
 using System.Diagnostics;
+using JTReader.Common;
 
 namespace DLAT.JTReader {
     public class DataSegment {
@@ -29,75 +30,81 @@ namespace DLAT.JTReader {
             }
         }
 
-        public void InitializeElements() {
-            dataStream.Position = 0;
+        public void InstantiateElements() {
+            if (elements == null)
+                return;
+            foreach (var element in elements) {
+                element.Instantiate();
+            }
+        }
 
+        
+        public DataSegment(JTFile jtFile, int segIndex) {
+            file = jtFile;
+            var fb = file.fileBytes;
+            var pos = 4 + jtFile.tocOffset + segIndex * jtFile.tocEntryLength;
+            //----TOC Entry----
+            segmentID = fb.ReadGUID(ref pos);
+            var segmentOffset = majorVersion > 9 ? fb.ReadI64(ref pos) : fb.ReadI32(ref pos);
+            segmentLength = fb.ReadU32(ref pos);
+            var segmentAttribute = fb.ReadBytes(ref pos, 4);
+            segmentType = segmentAttribute[3];
+            //----TOC Entry----
+
+            //----Segment Header----
+            pos = segmentOffset;
+            if (segmentID != fb.ReadGUID(ref pos))
+                throw new Exception("TOC Entry Segment ID doesn't equal to Segment Header Segment ID");
+            if (segmentType != fb.ReadI32(ref pos))
+                throw new Exception("TOC Entry Segment Type doesn't equal to Segment Header Segment Type");
+            if (segmentLength != fb.ReadI32(ref pos))
+                throw new Exception("TOC Entry Segment Length doesn't equal to Segment Header Segment Length");
+            //----Segment Header----
+
+            if (segmentType == 0) {
+                Debug.Log("#rFound segment type 0, skipped.#w");
+                return;
+            }
+            
+            var compressed = false;
+            var supportCompress = SegmentTypes.GetType(segmentType).Item2;
+            if(supportCompress) {
+                var compressionFlag = fb.ReadI32(ref pos);
+                var compressedLength = fb.ReadI32(ref pos) - 1;
+                var compressionAlgorithm = fb.ReadU8(ref pos);
+
+                //Console.WriteLine(file.version + " " + compressionAlgorithm);
+                if (compressionFlag == 2 && compressionAlgorithm == 2) {
+                    compressed = true;
+                    pos += 2; //skip zlib header
+                    dataStream = DecompressZLIB(new MemoryStream(fb, (int)pos, compressedLength - 2));
+                } else if (compressionFlag == 3 && compressionAlgorithm == 3) {
+                    compressed = true;
+                    dataStream = DecompressLZMA(new MemoryStream(fb, (int)pos, compressedLength));
+                } else
+                    throw new Exception("unknow compress method");
+            }
+            if(!compressed) 
+                dataStream = new MemoryStream(fb, (int)pos,(int)segmentLength - 24);
+            
+            dataStream.FromJTFile(jtFile);
+            dataStream.Position = 0;
             elements = new List<Element>();
             for(;dataStream.Position < dataStream.Length ; ) {
                 var ele = new Element(this);
+                ele.Instantiate();
                 if (ObjectTypeIdentifiers.isEOE(ele.objectTypeID))
                     break;
                 elements.Add(ele);
             }
+            dataStream.RemoveJTFileBind();
+            dataStream = null;
 
-        }
+            //Debug.Log("Segment type(#b" +
+            //          SegmentTypes.GetType(segmentType).Item1 + "#w) ID:" + segmentID + " begin:" + fs.Position +
+            //          " len:" +
+            //          segmentLength + " end:" + (fs.Position + segmentLength) + "| dataLen:" + dataStream.Length);
 
-        public static HashSet<(string,int)> versionCompressAlg = new HashSet<(string,int)>();
-
-        public DataSegment(JTFile jtFile) {
-            file = jtFile;
-            var fs = file.fileStream;
-            //----TOC Entry----
-            segmentID = fs.ReadGUID();
-            var segmentOffset = majorVersion > 9 ? fs.ReadI64() : fs.ReadI32();
-            segmentLength = fs.ReadU32();
-            var segmentAttribute = fs.ReadBytes(4);
-            segmentType = segmentAttribute[3];
-            //----TOC Entry----
-
-            long TOCEndPosition = fs.Position;
-
-            //----Segment Header----
-            fs.Position = segmentOffset;
-            if (segmentID != fs.ReadGUID())
-                throw new Exception("TOC Entry Segment ID doesn't equal to Segment Header Segment ID");
-            if (segmentType != fs.ReadI32())
-                throw new Exception("TOC Entry Segment Type doesn't equal to Segment Header Segment Type");
-            if (segmentLength != fs.ReadI32())
-                throw new Exception("TOC Entry Segment Length doesn't equal to Segment Header Segment Length");
-            //----Segment Header----
-
-            var compressed = false;
-            var supportCompress = SegmentTypes.GetType(segmentType).Item2;
-            if(supportCompress) {
-                var compressionFlag = fs.ReadI32();
-                var compressedLength = fs.ReadI32() - 1;
-                var compressionAlgorithm = fs.ReadU8();
-
-                versionCompressAlg.Add((file.Version, compressionAlgorithm));
-                //Console.WriteLine(file.version + " " + compressionAlgorithm);
-                if (compressionFlag == 2 && compressionAlgorithm == 2) {
-                    compressed = true;
-                    var zlibHeader = fs.ReadBytes(2);
-                    dataStream = DecompressZLIB(new MemoryStream(fs.ReadBytes(compressedLength - 2)));
-                }
-                else if(compressionFlag == 3 && compressionAlgorithm == 3) {
-                    compressed = true;
-                    dataStream = DecompressLZMA(new MemoryStream(fs.ReadBytes(compressedLength)));
-                }
-            }
-            if(!compressed) 
-                dataStream = new MemoryStream(fs.ReadBytes((int)segmentLength - 24));
-
-            dataStream.FromJTFile(jtFile);
-            fs.Position = TOCEndPosition;
-
-            Debug.Log("Segment type(#b" +
-                      SegmentTypes.GetType(segmentType).Item1 + "#w) ID:" + segmentID + " begin:" + fs.Position +
-                      " len:" +
-                      segmentLength + " end:" + (fs.Position + segmentLength) + "| dataLen:" + dataStream.Length);
-
-            InitializeElements();
 
         }
 
@@ -105,14 +112,18 @@ namespace DLAT.JTReader {
             var deflate = new DeflateStream(compressed, CompressionMode.Decompress);
             var decompressed = new MemoryStream();
             deflate.CopyTo(decompressed);
+            deflate.Dispose();
             decompressed.Position = 0;
             return decompressed;
         }
-
+        
         public Stream DecompressLZMA(Stream compressed) {
-            var xz = new XZStream(compressed, new XZDecompressOptions());
+            var xzDecompressOptions = new XZDecompressOptions();
+            xzDecompressOptions.BufferSize = 0;
+            var xz = new XZStream(compressed, xzDecompressOptions);
             var decompressed = new MemoryStream();
             xz.CopyTo(decompressed);
+            xz.Dispose();
             decompressed.Position = 0;
             return decompressed;
         }

@@ -201,7 +201,7 @@ namespace DLAT.JTReader {
         public List<double> colorValues;
 
         public CompressedVertexColorArray(Stream data) {
-            var normalCount = data.ReadI32();
+            var colorCount = data.ReadI32();
             var numberComponents = data.ReadU8();
             var quantizationBits = data.ReadU8();
 
@@ -216,17 +216,23 @@ namespace DLAT.JTReader {
 
             if (quantizationBits == 0) {
                 for (int i = 0; i < numberComponents; i++) {
-                    List<int> exponents = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
-                    List<int> mantissae = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
+                    if (data.FromJTFile().majorVersion < 10) {
+                        List<int> exponents = Int32CDP.ReadVecU32(data, PredictorType.PredNull);
+                        List<int> mantissae = Int32CDP.ReadVecU32(data, PredictorType.PredNull);
+                        List<int> codeData = new List<int>();
+                        for (int j = 0; j < exponents.Count; j++)
+                            codeData.Add((exponents[j] << 23) | mantissae[j]);
+                        vertexColorExponentsLists.Add(exponents);
+                        vertexColorMantissaeLists.Add(mantissae);
+                        vertexColorCodeLists.Add(codeData);
+                        //this four bit hasn't defined in document.
+                        //don't what it is.
+                        var unknownField = data.ReadU32();
+                    }
+                    else {
+                        vertexColorCodeLists.Add(Int32CDP.ReadVecU32(data, PredictorType.PredNull));
+                    }
 
-                    List<int> codeData = new List<int>();
-                    for (int j = 0; j < exponents.Count; j++)
-                        codeData.Add((exponents[j] << 23) | mantissae[j]);
-
-
-                    vertexColorExponentsLists.Add(exponents);
-                    vertexColorMantissaeLists.Add(mantissae);
-                    vertexColorCodeLists.Add(codeData);
                 }
 
                 List<int> redCodeData = vertexColorCodeLists[0];
@@ -241,18 +247,23 @@ namespace DLAT.JTReader {
             else {
                 var colorQuantizerData = new ColorQuantizerData(data);
 
-                hueRedCodes    = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
-                satGreenCodes  = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
-                valueBlueCodes = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
-                alphaCodes     = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
+                if (data.FromJTFile().majorVersion == 9) {
+                    hueRedCodes    = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
+                    satGreenCodes  = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
+                    valueBlueCodes = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
+                    alphaCodes     = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
 
-                List<Double> redValues = CODEC.Dequantize(hueRedCodes, colorQuantizerData.rRange, quantizationBits);
-                List<Double> greenValues = CODEC.Dequantize(satGreenCodes, colorQuantizerData.gRange, quantizationBits);
-                List<Double> blueValues = CODEC.Dequantize(valueBlueCodes, colorQuantizerData.bRange, quantizationBits);
-                for (int i = 0; i < redValues.Count; i++) {
-                    colorValues.Add(redValues[i]);
-                    colorValues.Add(greenValues[i]);
-                    colorValues.Add(blueValues[i]);
+                    List<Double> redValues = CODEC.Dequantize(hueRedCodes, colorQuantizerData.rRange, quantizationBits);
+                    List<Double> greenValues = CODEC.Dequantize(satGreenCodes, colorQuantizerData.gRange, quantizationBits);
+                    List<Double> blueValues = CODEC.Dequantize(valueBlueCodes, colorQuantizerData.bRange, quantizationBits);
+                    for (int i = 0; i < redValues.Count; i++) {
+                        colorValues.Add(redValues[i]);
+                        colorValues.Add(greenValues[i]);
+                        colorValues.Add(blueValues[i]);
+                    }
+                }
+                else {
+                    var colorCodes = Int32CDP.ReadVecU32(data, PredictorType.PredNull);
                 }
             }
 

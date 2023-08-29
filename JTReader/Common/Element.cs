@@ -11,20 +11,22 @@ namespace DLAT.JTReader {
         public GUID objectTypeID;
         public int objectID = -1;
         public Stream dataStream;
-
+        public Type elementType;
         public object elementData;
 
-        public int majorVersion {
-            get { return segment.majorVersion; }
-        }
-        public int minorVersion {
-            get { return segment.minorVersion; }
-        }
+        public int majorVersion => segment.majorVersion;
+        public int minorVersion => segment.minorVersion;
 
+        public void Instantiate() {
+            if (dataStream == null)
+                return;
+            elementData = Activator.CreateInstance(elementType, new object[] { this });
+            dataStream = null;
+        }
+        
         public Element(DataSegment seg) {
             segment = seg;
             var stream = seg.dataStream;
-            var dataBegin = stream.Position; //debug
             var elementLength = stream.ReadI32();
             var begin = stream.Position;
             objectTypeID = stream.ReadGUID();
@@ -36,33 +38,35 @@ namespace DLAT.JTReader {
 
             //Debug.cache = true;
             
+            //dataStream = stream;
             dataStream = new MemoryStream(stream.ReadBytes(elementLength - (int)(stream.Position - begin), 1));
             dataStream.FromJTFile(stream.FromJTFile());
             dataStream.Position = 0;
-            var elementType = ObjectTypeIdentifiers.types[objectTypeID.ToString()];
+            elementType = ObjectTypeIdentifiers.types[objectTypeID.ToString()];
 
-            Debug.Log("    Element ID:" + objectID
-                                        + " type(#g" + ObjectTypeIdentifiers.GetTypeString(objectTypeID) + "#w) "
-                                        + "begin:" + dataBegin + " len:" + elementLength + " end:" +
-                                        stream.Position + " dataLen:" + dataStream.Length);
+            //Debug.Log("    Element ID:" + objectID
+            //                            + " type(#g" + ObjectTypeIdentifiers.GetTypeString(objectTypeID) + "#w) "
+            //                            + "begin:" + dataBegin + " len:" + elementLength + " end:" +
+            //                            stream.Position + " dataLen:" + dataStream.Length);
 
            
-            elementData = Activator.CreateInstance(elementType, new object[] { this });
+            
             //Debug.cache = false;
         
             //Debug.FlushLogs();
-            if (dataStream.Position + 1 == dataStream.Length) return;
-            {
-                //read length not equal
-                Debug.Log(
-                    dataStream.Position < dataStream.Length - 1
-                        ? $"#yElement data not fully read! Remain:{dataStream.Length - dataStream.Position - 1}#w"
-                        : "#rElement data over read!#w", 2);
-                if(dataStream.Position >= dataStream.Length - 1)
-                    throw new Exception("Read Align Error");
-            }
-
+            //if (dataStream.Position + 1 == dataStream.Length - dataBegin) return;
             
+            // var elementInfoStr = "Element ID:" + objectID
+            //                              + " type(#g" + ObjectTypeIdentifiers.GetTypeString(objectTypeID) + "#y)#w\n"
+            //                              + "    begin:" + dataBegin + " len:" + elementLength + " end:" +
+            //                              stream.Position + " dataLen:" + dataStream.Length;
+            // //read length not equal
+            // Debug.Log(
+            //     dataStream.Position < dataStream.Length - 1
+            //         ? $"#y{elementInfoStr}. Element data not fully read! Remain:{dataStream.Length - dataStream.Position - 1}#w"
+            //         : $"#r{elementInfoStr}Element data over read!#w");
+            // if(dataStream.Position >= dataStream.Length - dataBegin - 1)
+            //     throw new Exception("Read Align Error");
         }
     }
 }

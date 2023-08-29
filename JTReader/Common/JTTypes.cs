@@ -190,6 +190,7 @@ namespace DLAT.JTReader {
     static class SegmentTypes {
         static readonly Dictionary<int, (string, bool)> types = new Dictionary<int, (string, bool)> {
             //id, name, surpot ZLIB
+            { 0, (/*WTF*/"There is no Type 0 in the manual", true /*anyway I found out that it support compress*/) },
             { 1, ("Logical Scene Graph", true) },
             { 2, ("JT B-Rep", true) },
             { 3, ("PMI Data", true) },

@@ -24,10 +24,11 @@ namespace DLAT.JTReader {
                     quantizationParameters = new QuantizationParameters(data);
                     break;
                 case 9:
+                    
                     version = data.ReadI16();
                     vertexBinding = data.ReadU64();
                     quantizationParameters = new QuantizationParameters(data);
-                    if(version == 1)
+                    if(version == 1 && data.Length - data.Position >= 8)
                         vertexBinding = data.ReadU64();
                     break;
                 case 10:

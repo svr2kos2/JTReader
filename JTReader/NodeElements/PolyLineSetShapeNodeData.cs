@@ -16,9 +16,6 @@ namespace DLAT.JTReader {
             if (ele.minorVersion == 10)
                 version = data.ReadU8();
             areaFactor = data.ReadF32();
-            if(ele.majorVersion == 9 && version == 1) {
-                var vertexBindings = data.ReadU64();
-            }
         }
     }
 }
