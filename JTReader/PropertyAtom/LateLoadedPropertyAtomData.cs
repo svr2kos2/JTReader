@@ -16,8 +16,12 @@ namespace DLAT.JTReader {
                 version = ele.majorVersion > 9 ? data.ReadU8() : data.ReadI16();
             segmeentID = new GUID(data);
             segmentType = data.ReadI32();
+            if(ele.majorVersion < 9)
+                return;
             payloadObjectID = data.ReadI32();
-            var reserved = data.ReadI32();
+            if (data.Length - data.Position >= 4) {
+                var reserved = data.ReadI32();
+            }
         }
     }
 }

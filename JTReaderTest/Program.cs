@@ -55,9 +55,11 @@ namespace JTReaderTest {
                 var files = Directory.GetFiles(dir);
                 foreach (var jtFile in files) {
                     if (jtFile.EndsWith(".jt")) {
-                        readers.Add(Task.Run(() => {
+                        var task = Task.Run(() => {
                             return new JTFile(jtFile);
-                        }));
+                        });
+                        task.Wait();
+                        readers.Add(task);
                     }
                 }
 

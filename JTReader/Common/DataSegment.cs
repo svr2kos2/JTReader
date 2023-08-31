@@ -7,6 +7,7 @@ using System.IO.Compression;
 using System.Runtime.InteropServices.ComTypes;
 using Joveler.Compression.XZ;
 using System.Diagnostics;
+using JTReader;
 using JTReader.Common;
 
 namespace DLAT.JTReader {
@@ -81,13 +82,22 @@ namespace DLAT.JTReader {
             dataStream.FromJTFile(jtFile);
             dataStream.Position = 0;
             elements = new List<Element>();
+            bool graphElementsRead = (file.majorVersion >= 10 && file.minorVersion >= 5);
             for(;dataStream.Position < dataStream.Length ; ) {
                 var ele = new Element(this);
                 ele.Instantiate();
-                if (ObjectTypeIdentifiers.isEOE(ele.objectTypeID))
-                    break;
+                if (ObjectTypeIdentifiers.isEOE(ele.objectTypeID)) {
+                    if (segmentID != file.lsgSegmentID || graphElementsRead)
+                        break;
+                    graphElementsRead = true;
+                }
                 elements.Add(ele);
             }
+
+            if (segmentID == file.lsgSegmentID)
+                file.propertyTable = new PropertyTable(dataStream);
+            
+
             dataStream.RemoveJTFileBind();
             dataStream = null;
 
@@ -95,8 +105,6 @@ namespace DLAT.JTReader {
             //          SegmentTypes.GetType(segmentType).Item1 + "#w) ID:" + segmentID + " begin:" + fs.Position +
             //          " len:" +
             //          segmentLength + " end:" + (fs.Position + segmentLength) + "| dataLen:" + dataStream.Length);
-
-
         }
 
         public Stream DecompressZLIB(Stream compressed) {

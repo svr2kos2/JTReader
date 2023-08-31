@@ -42,6 +42,10 @@ namespace DLAT.JTReader {
             dataStream = new MemoryStream(stream.ReadBytes(elementLength - (int)(stream.Position - begin), 1));
             dataStream.FromJTFile(stream.FromJTFile());
             dataStream.Position = 0;
+            if (!ObjectTypeIdentifiers.types.ContainsKey(objectTypeID.ToString())) {
+                dataStream = null;   
+                return;
+            }
             elementType = ObjectTypeIdentifiers.types[objectTypeID.ToString()];
 
             //Debug.Log("    Element ID:" + objectID

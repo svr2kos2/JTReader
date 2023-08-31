@@ -14,7 +14,7 @@ namespace DLAT.JTReader {
             if (ele.majorVersion == 8)
                 ele.objectID = data.ReadI32();
             else
-                version = ele.majorVersion > 9 ? data.ReadU8() : data.ReadI16();
+                version = data.ReadVersionNumber();
             stateFlags = data.ReadU32();
         }
     }

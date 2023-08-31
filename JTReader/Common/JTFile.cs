@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using JTReader;
 using JTReader.Common;
 
 namespace DLAT.JTReader {
@@ -27,8 +28,10 @@ namespace DLAT.JTReader {
         public byte[] fileBytes;
         public long tocOffset;
         
-        public List<DataSegment> segments;
+        public Dictionary<GUID, DataSegment> segments;
+        public GUID lsgSegmentID;
         public DataSegment LSGSegment;
+        public PropertyTable propertyTable;
 
         static bool isXZInited = false;
         
@@ -50,7 +53,7 @@ namespace DLAT.JTReader {
             var emptyField = fileBytes.ReadI32(ref filePos);
             tocOffset = majorVersion > 9 ? fileBytes.ReadI64(ref filePos) : (long)fileBytes.ReadI32(ref filePos);
             tocEntryLength = majorVersion > 9 ? 32 : 28;
-            var LSGSegmentID = new GUID(fileBytes);
+            lsgSegmentID = new GUID(fileBytes.ReadBytes(ref filePos, 16));
 
             filePos = tocOffset;
             var entryCount = fileBytes.ReadI32(ref filePos);
@@ -71,11 +74,11 @@ namespace DLAT.JTReader {
             Console.WriteLine("v" + Version + " seg:" + entryCount + " " + filePath);
             
             
-            segments = new List<DataSegment>();
+            segments = new Dictionary<GUID, DataSegment>();
             for (int i = 0; i < entryCount; ++i) {
                 var seg = new DataSegment(this, i);
                 if(seg.dataStream != null)
-                    segments.Add(seg);
+                    segments.Add(seg.segmentID, seg);
             }
             fileBytes = null;
             
