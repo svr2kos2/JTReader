@@ -47,19 +47,26 @@ namespace DLAT.JTReader {
                 return;
             }
             elementType = ObjectTypeIdentifiers.types[objectTypeID.ToString()];
+            
+            Instantiate();
+            
+            if (elementType == typeof(PropertyProxyMetaData)) {
+                var data = elementData;
+            }
+            
 
             //Debug.Log("    Element ID:" + objectID
             //                            + " type(#g" + ObjectTypeIdentifiers.GetTypeString(objectTypeID) + "#w) "
             //                            + "begin:" + dataBegin + " len:" + elementLength + " end:" +
             //                            stream.Position + " dataLen:" + dataStream.Length);
 
-           
-            
+
+
             //Debug.cache = false;
-        
+
             //Debug.FlushLogs();
             //if (dataStream.Position + 1 == dataStream.Length - dataBegin) return;
-            
+
             // var elementInfoStr = "Element ID:" + objectID
             //                              + " type(#g" + ObjectTypeIdentifiers.GetTypeString(objectTypeID) + "#y)#w\n"
             //                              + "    begin:" + dataBegin + " len:" + elementLength + " end:" +

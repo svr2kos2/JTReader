@@ -85,13 +85,14 @@ namespace DLAT.JTReader {
             bool graphElementsRead = (file.majorVersion >= 10 && file.minorVersion >= 5);
             for(;dataStream.Position < dataStream.Length ; ) {
                 var ele = new Element(this);
-                ele.Instantiate();
                 if (ObjectTypeIdentifiers.isEOE(ele.objectTypeID)) {
                     if (segmentID != file.lsgSegmentID || graphElementsRead)
                         break;
                     graphElementsRead = true;
                 }
                 elements.Add(ele);
+                if (ele.objectID != -1 && !file.elements.ContainsKey(ele.objectID))
+                    file.elements.Add(ele.objectID, ele);
             }
 
             if (segmentID == file.lsgSegmentID)

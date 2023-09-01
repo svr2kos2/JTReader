@@ -20,7 +20,12 @@ namespace DLAT.JTReader {
             return hashCode;
         }
         public override bool Equals(object obj) {
-            return (obj as GUID).id.SequenceEqual(id);
+            var otherID = obj == null ? null : (obj as GUID).id;
+            if (otherID == null && id == null)
+                return true;
+            if (otherID == null || id == null)
+                return false;
+            return otherID.SequenceEqual(id);
         }
         public static bool operator ==(GUID x, GUID y) {
             return x.Equals(y);

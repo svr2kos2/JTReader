@@ -63,7 +63,7 @@ namespace DLAT.JTReader {
             }
 
             Int32ProbabilityContexts int32ProbabilityContexts = null;
-            int[] outOfBandValues = null;
+            int[] outOfBandValues = new int[0];
 
             if (codecType == CODECTYPE_ARITHMETIC) {
                 int32ProbabilityContexts = new Int32ProbabilityContexts(data);

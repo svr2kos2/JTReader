@@ -14,5 +14,9 @@ namespace DLAT.JTReader {
                 version = ele.majorVersion > 9 ? data.ReadU8() : data.ReadI16();
             value = data.ReadI32();
         }
+        
+        public override string ToString() {
+            return "int: " + value.ToString();
+        }
     }
 }

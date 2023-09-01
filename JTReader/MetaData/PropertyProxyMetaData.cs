@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DLAT.JTReader {
     public class PropertyProxyMetaData {
-        Dictionary<string, (byte, object)> property;
+        public Dictionary<string, (byte, object)> property;
         public PropertyProxyMetaData(Element ele) {
             var data = ele.dataStream;
             short version = 0;
@@ -38,6 +38,7 @@ namespace DLAT.JTReader {
                 //Debug.Log("Type:#g" + type + "#w Key:" + key,2);
                 //Debug.Log(" Value:" + val, 3);
                 property.Add(key, (type, val));
+                
             }
         }
 

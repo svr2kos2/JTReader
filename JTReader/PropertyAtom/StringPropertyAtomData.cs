@@ -13,7 +13,11 @@ namespace DLAT.JTReader {
             if (ele.majorVersion > 8)
                 version = ele.majorVersion > 9 ? data.ReadU8() : data.ReadI16();
             value = data.ReadMbString();
-            //Debug.Log("        Value:" + value);
+            
+        }
+        
+        public override string ToString() {
+            return "str: " + value;
         }
     }
 }

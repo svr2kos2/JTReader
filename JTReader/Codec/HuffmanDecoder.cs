@@ -18,6 +18,12 @@ namespace DLAT.JTReader {
             public HuffmanCodeData huffmanCodeData;
             public int associatedValue;
 
+            public HuffmanTreeNode() {
+                huffmanCodeData = new HuffmanCodeData();
+                symbolCount = 0;
+                associatedValue = 0;
+            }
+            
             public bool IsLesser(HuffmanTreeNode node) {
                 return symbolCount < node.symbolCount;
             }

@@ -14,5 +14,9 @@ namespace DLAT.JTReader {
                 version = ele.majorVersion > 9 ? data.ReadU8() : data.ReadI16();
             value = data.ReadF32();
         }
+        
+        public override string ToString() {
+            return "float: " + value.ToString();
+        }
     }
 }

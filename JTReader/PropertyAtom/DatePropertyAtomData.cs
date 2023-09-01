@@ -21,6 +21,9 @@ namespace DLAT.JTReader {
             var second = data.ReadI16();
             date = new DateTime(year, month, day, hour, minute, second);
         }
-
+        
+        public override string ToString() {
+            return "date: " + date.ToString();
+        }
     }
 }

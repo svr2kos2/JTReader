@@ -42,7 +42,7 @@ namespace DLAT.JTReader {
             int outOfBandValueCount;
             int codeTextLength;
             int valueElementCount;
-            int[] outOfBandValues = null;
+            int[] outOfBandValues = new int[0];
             int symbolCount;
 
             if (codecType == CODECTYPE_HUFFMAN || codecType == CODECTYPE_ARITHMETIC) {

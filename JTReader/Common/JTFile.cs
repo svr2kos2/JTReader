@@ -29,6 +29,7 @@ namespace DLAT.JTReader {
         public long tocOffset;
         
         public Dictionary<GUID, DataSegment> segments;
+        public Dictionary<int, Element> elements;
         public GUID lsgSegmentID;
         public DataSegment LSGSegment;
         public PropertyTable propertyTable;
@@ -72,13 +73,15 @@ namespace DLAT.JTReader {
             //     segments.Add(seg);
             // }
             Console.WriteLine("v" + Version + " seg:" + entryCount + " " + filePath);
-            
-            
+
+            elements = new Dictionary<int, Element>();
             segments = new Dictionary<GUID, DataSegment>();
             for (int i = 0; i < entryCount; ++i) {
                 var seg = new DataSegment(this, i);
-                if(seg.dataStream != null)
+                if(seg.segmentID != null)
                     segments.Add(seg.segmentID, seg);
+                if (seg.segmentID == lsgSegmentID)
+                    LSGSegment = seg;
             }
             fileBytes = null;
             
