@@ -32,7 +32,6 @@ namespace JTReader {
                 var value = data.ReadI32();
                 propertyAtomObjectID.Add(key, value);
             }
-
         }
     }
 }

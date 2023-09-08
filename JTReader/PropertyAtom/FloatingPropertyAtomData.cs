@@ -16,7 +16,12 @@ namespace DLAT.JTReader {
         }
         
         public override string ToString() {
-            return "float: " + value.ToString();
+            return value.ToString();
+        }
+        
+        //重载float 类型
+        public static implicit operator float(FloatingPropertyAtomData data) {
+            return data.value;
         }
     }
 }

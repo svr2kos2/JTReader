@@ -4,7 +4,7 @@ using System.IO;
 
 namespace DLAT.JTReader {
     public class CompressedVertexCoordinateArray {
-        public List<double> vertexCoordinates;
+        public List<float> vertexCoordinates;
 
         public CompressedVertexCoordinateArray(Stream data) {
             if (data.FromJTFile().majorVersion == 9)
@@ -22,7 +22,7 @@ namespace DLAT.JTReader {
             List<List<int>> vertexCoordExponentLists = new List<List<int>>();
             List<List<int>> vertexCoordMantissaeLists = new List<List<int>>();
             List<List<int>> vertexCoordCodeLists = new List<List<int>>();
-            vertexCoordinates = new List<double>();
+            vertexCoordinates = new List<float>();
             int numberOfBits = pointQuantizerData.numberOfBits;
             if (numberOfBits == 0) {
                 for (int i = 0; i < numberComponents; i++) {
@@ -50,11 +50,11 @@ namespace DLAT.JTReader {
                 vertexCoordCodeLists.Add(Int32CDP.ReadVecU32(data, PredictorType.PredLag1));
                 vertexCoordCodeLists.Add(Int32CDP.ReadVecU32(data, PredictorType.PredLag1));
                 
-                List<Double> xValues =
+                List<float> xValues =
                     CODEC.Dequantize(vertexCoordCodeLists[0], pointQuantizerData.xRange, numberOfBits);
-                List<Double> yValues =
+                List<float> yValues =
                     CODEC.Dequantize(vertexCoordCodeLists[1], pointQuantizerData.yRange, numberOfBits);
-                List<Double> zValues =
+                List<float> zValues =
                     CODEC.Dequantize(vertexCoordCodeLists[2], pointQuantizerData.zRange, numberOfBits);
                 for (int i = 0; i < xValues.Count; i++) {
                     vertexCoordinates.Add(xValues[i]);
@@ -73,15 +73,21 @@ namespace DLAT.JTReader {
             int uniqueVertexCount = data.ReadI32();
             int numberComponents = data.ReadU8();
             PointQuantizerData pointQuantizerData = new PointQuantizerData(data);
-            
-            vertexCoordinates = new List<double>();
+
+            var xValues = new List<float>();
+            var yValues = new List<float>();
+            var zValues = new List<float>();
+            vertexCoordinates = new List<float>();
             int numberOfBits = pointQuantizerData.numberOfBits;
             if (numberOfBits == 0) {
                 var binaryVertexCoords = new List<int>[numberComponents];
                 for (int i = 0; i < numberComponents; i++) {
                     binaryVertexCoords[i] = Int32CDP.ReadVecU32(data, PredictorType.PredLag1);
                 }
-
+                //convert binaryVertexCoords to x,y,z values
+                xValues = CODEC.IntArrayToFloatArray(binaryVertexCoords[0]);
+                yValues = CODEC.IntArrayToFloatArray(binaryVertexCoords[1]);
+                zValues = CODEC.IntArrayToFloatArray(binaryVertexCoords[2]);
             }
             else if (numberOfBits > 0) {
                 var vertexCoordCodeLists = new List<int>[3];
@@ -89,20 +95,20 @@ namespace DLAT.JTReader {
                 vertexCoordCodeLists[1] = Int32CDP.ReadVecU32(data, PredictorType.PredLag1);
                 vertexCoordCodeLists[2] = Int32CDP.ReadVecU32(data, PredictorType.PredLag1);
                 
-                List<Double> xValues =
+                xValues =
                     CODEC.Dequantize(vertexCoordCodeLists[0], pointQuantizerData.xRange, numberOfBits);
-                List<Double> yValues =
+                yValues =
                     CODEC.Dequantize(vertexCoordCodeLists[1], pointQuantizerData.yRange, numberOfBits);
-                List<Double> zValues =
+                zValues =
                     CODEC.Dequantize(vertexCoordCodeLists[2], pointQuantizerData.zRange, numberOfBits);
-                for (int i = 0; i < xValues.Count; i++) {
-                    vertexCoordinates.Add(xValues[i]);
-                    vertexCoordinates.Add(yValues[i]);
-                    vertexCoordinates.Add(zValues[i]);
-                }
             }
             else {
                 throw new Exception("ERROR: Negative number of quantized bits: " + numberOfBits);
+            }
+            for (int i = 0; i < xValues.Count; i++) {
+                vertexCoordinates.Add(xValues[i]);
+                vertexCoordinates.Add(yValues[i]);
+                vertexCoordinates.Add(zValues[i]);
             }
             
             long readHash = data.ReadU32();
@@ -253,9 +259,9 @@ namespace DLAT.JTReader {
                     valueBlueCodes = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
                     alphaCodes     = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
 
-                    List<Double> redValues = CODEC.Dequantize(hueRedCodes, colorQuantizerData.rRange, quantizationBits);
-                    List<Double> greenValues = CODEC.Dequantize(satGreenCodes, colorQuantizerData.gRange, quantizationBits);
-                    List<Double> blueValues = CODEC.Dequantize(valueBlueCodes, colorQuantizerData.bRange, quantizationBits);
+                    List<float> redValues = CODEC.Dequantize(hueRedCodes, colorQuantizerData.rRange, quantizationBits);
+                    List<float> greenValues = CODEC.Dequantize(satGreenCodes, colorQuantizerData.gRange, quantizationBits);
+                    List<float> blueValues = CODEC.Dequantize(valueBlueCodes, colorQuantizerData.bRange, quantizationBits);
                     for (int i = 0; i < redValues.Count; i++) {
                         colorValues.Add(redValues[i]);
                         colorValues.Add(greenValues[i]);
@@ -314,8 +320,8 @@ namespace DLAT.JTReader {
 				    textureCoordCodesLists.Add(Int32CDP.ReadVecU32(data, PredictorType.PredLag1));
 			    }
 
-			    List<Double> uValues = CODEC.Dequantize(textureCoordCodesLists[0], textureQuantizerData.uRange, quantizationBits);
-			    List<Double> vValues = CODEC.Dequantize(textureCoordCodesLists[1], textureQuantizerData.vRange, quantizationBits);
+			    List<float> uValues = CODEC.Dequantize(textureCoordCodesLists[0], textureQuantizerData.uRange, quantizationBits);
+			    List<float> vValues = CODEC.Dequantize(textureCoordCodesLists[1], textureQuantizerData.vRange, quantizationBits);
 			    for(int i = 0; i < uValues.Count; i++){
 				    textureCoordinates.Add(uValues[i]);
 				    textureCoordinates.Add(vValues[i]);

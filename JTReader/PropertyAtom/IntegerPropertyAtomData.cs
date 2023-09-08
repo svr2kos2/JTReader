@@ -16,7 +16,13 @@ namespace DLAT.JTReader {
         }
         
         public override string ToString() {
-            return "int: " + value.ToString();
+            return value.ToString();
         }
+        
+        //重载int 类型
+        public static implicit operator int(IntegerPropertyAtomData data) {
+            return data.value;
+        }
+        
     }
 }

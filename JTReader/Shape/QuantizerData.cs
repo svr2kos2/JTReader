@@ -139,11 +139,11 @@ namespace DLAT.JTReader {
             zVertexCoordinates = Int32CDP.ReadVecU32(data, PredictorType.PredLag1);
 
         }
-        public List<double> GetVertices() {
+        public List<float> GetVertices() {
             var xVertices = CODEC.Dequantize(xVertexCoordinates,pointQuantizerData.xRange,pointQuantizerData.numberOfBits);
             var yVertices = CODEC.Dequantize(yVertexCoordinates,pointQuantizerData.yRange,pointQuantizerData.numberOfBits);
             var zVertices = CODEC.Dequantize(zVertexCoordinates,pointQuantizerData.zRange,pointQuantizerData.numberOfBits);
-            List<double> vertices = new List<double>();
+            var vertices = new List<float>();
             for (int i = 0; i < xVertexCoordinates.Count; i++) {
                 vertices.Add(xVertices[i]);
                 vertices.Add(yVertices[i]);

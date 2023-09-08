@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Remoting.Messaging;
@@ -55,6 +56,16 @@ namespace DLAT.JTReader {
                 parameters = new QuantizationParameters(data);
             }
         }
+
+        public List<float> GetVertices() {
+            if(topoMeshCompressedLODData != null)
+                return topoMeshCompressedLODData.GetVertices();
+            
+            var  repData = topoMeshTopologicallyCompressedLODData.repData;
+            var topologicallyCompressedVertexRecords = repData.vertexRecords;
+            var coordinateArray = topologicallyCompressedVertexRecords.compressedVertexCoordinateArray;
+            return coordinateArray.vertexCoordinates;
+        }
         
     }
 
@@ -88,6 +99,17 @@ namespace DLAT.JTReader {
                 throw new Exception("Found invalid version number: " + versionNumber);
             }
         }
+
+        public List<float> GetVertices() {
+            if (repDataV1 != null)
+                return repDataV1.compressedVertexCoordinateArray.vertexCoordinates;
+            if (repDataV2 != null) {
+                return repDataV2.
+                    topoMeshCompressedRepDataV1.compressedVertexCoordinateArray.vertexCoordinates;
+            }
+            return null;
+        }
+        
     }
 
     public class TopoMeshTopologicallyCompressedLODData : TopoMeshLODData {
@@ -100,6 +122,13 @@ namespace DLAT.JTReader {
                 versionNumber = data.ReadVersionNumber();
             repData = new TopologicallyCompressedRepData(ele);
         }
+
+        public List<float> GetVertices() {
+            var topologicallyCompressedVertexRecords = repData.vertexRecords;
+            var coordinateArray = topologicallyCompressedVertexRecords.compressedVertexCoordinateArray;
+            return coordinateArray.vertexCoordinates;
+        }
+        
     }
 
 

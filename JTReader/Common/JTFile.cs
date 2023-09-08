@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using JTReader;
@@ -9,6 +10,7 @@ using JTReader.Common;
 
 namespace DLAT.JTReader {
     public class JTFile {
+        public readonly string _filePath;
         string _version;
         public string Version {
             get {
@@ -37,8 +39,11 @@ namespace DLAT.JTReader {
         static bool isXZInited = false;
         
         public int tocEntryLength = 0;
+
+        public string txKinModelingBuffer = null;
         
         public JTFile(string filePath) {
+            _filePath = filePath;
             var start = DateTime.Now;
             
             if(!isXZInited) 
@@ -112,7 +117,12 @@ namespace DLAT.JTReader {
                     arch = "arm64";
                     break;
             }
+
+            var absLoc = Assembly.GetExecutingAssembly().Location;
+            absLoc = absLoc.Remove(absLoc.LastIndexOf(Path.DirectorySeparatorChar));
             string libPath = Path.Combine(arch, "liblzma.dll");
+            if(!File.Exists(libPath))
+                libPath = Path.Combine(absLoc, "liblzma.dll");
 
             if (!File.Exists(libPath))
                 throw new PlatformNotSupportedException($"Unable to find native library [{libPath}].");

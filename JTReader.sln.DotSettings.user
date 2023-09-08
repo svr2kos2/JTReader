@@ -1,2 +1,9 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
-	<s:String x:Key="/Default/CodeInspection/PencilsConfiguration/ActualSeverity/@EntryValue">WARNING</s:String></wpf:ResourceDictionary>
+	<s:Boolean x:Key="/Default/AddReferences/RecentPaths/=C_003A_005CProgram_0020Files_005CUnity_005CHub_005CEditor_005C2021_002E3_002E19f1c1_005CEditor_005CData_005CManaged_005CUnityEngine_002Edll/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/AddReferences/RecentPaths/=C_003A_005CProgram_0020Files_005CUnity_005CHub_005CEditor_005C2021_002E3_002E19f1c1_005CEditor_005CData_005CManaged_005CUnityEngine_005CUnityEditor_002ECoreModule_002Edll/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/AddReferences/RecentPaths/=C_003A_005CProgram_0020Files_005CUnity_005CHub_005CEditor_005C2021_002E3_002E19f1c1_005CEditor_005CData_005CManaged_005CUnityEngine_005CUnityEditor_002Edll/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/AddReferences/RecentPaths/=C_003A_005CProgram_0020Files_005CUnity_005CHub_005CEditor_005C2021_002E3_002E19f1c1_005CEditor_005CData_005CManaged_005CUnityEngine_005CUnityEngine_002ECoreModule_002Edll/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/AddReferences/RecentPaths/=C_003A_005CProgram_0020Files_005CUnity_005CHub_005CEditor_005C2021_002E3_002E19f1c1_005CEditor_005CData_005CManaged_005CUnityEngine_005CUnityEngine_002Edll/@EntryIndexedValue">True</s:Boolean>
+	<s:String x:Key="/Default/CodeInspection/PencilsConfiguration/ActualSeverity/@EntryValue">WARNING</s:String>
+	<s:Boolean x:Key="/Default/UnloadedProject/UnloadedProjects/=55b36e06_002Decad_002D4908_002D8f2f_002D9250cf6be85c_0023TxKinSolverForUnity/@EntryIndexedValue">True</s:Boolean>
+	</wpf:ResourceDictionary>

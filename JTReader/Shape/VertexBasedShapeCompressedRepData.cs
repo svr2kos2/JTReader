@@ -41,7 +41,7 @@ namespace DLAT.JTReader {
                 lossyQuantizedRawVertex = new LossyQuantizedRawVertexData(data, textureCoordBinding, colorBinding, normalBinding);
         }
 
-        public List<double> GetVertices() {
+        public List<float> GetVertices() {
             if (losslessCompressedRawVertex != null)
                 return losslessCompressedRawVertex.vertices;
             else
@@ -61,8 +61,8 @@ namespace DLAT.JTReader {
     public class LosslessCompressedRawVertexData {
         public List<float> textureCoordinates;
         public List<float> colors;
-        public List<double> normals;
-        public List<double> vertices;
+        public List<float> normals;
+        public List<float> vertices;
         public LosslessCompressedRawVertexData(Stream data,int textureCoordBinding, int colorBinding, int normalBinding) {
             var uncompressedDataSize = data.ReadI32();
             var compressedDataSize = data.ReadI32();
@@ -79,10 +79,7 @@ namespace DLAT.JTReader {
             } else if(compressedDataSize > 0) {
                 var zlibHeader = data.ReadBytes(2);
                 var compressedBytes = new MemoryStream(data.ReadBytes(compressedDataSize - 2));
-                var uncompressedStream = new MemoryStream();
-                var uncompressedDeflate = new DeflateStream(compressedBytes, CompressionMode.Decompress);
-                uncompressedDeflate.CopyTo(uncompressedStream);
-                uncompressedStream.Position = 0;
+                var uncompressedStream = CODEC.DecompressZLIB(compressedBytes);
                 if (uncompressedStream.Length != uncompressedDataSize) {
                     throw new Exception("ZLIB decompression seems to be failed! Expected length: " + uncompressedDataSize + " -> resulting length: " + uncompressedStream.Length);
                 }
@@ -98,8 +95,8 @@ namespace DLAT.JTReader {
             // Create derived lists
             textureCoordinates = new List<float>();
             colors = new List<float>();
-            normals = new List<double>();
-            vertices = new List<double>();
+            normals = new List<float>();
+            vertices = new List<float>();
 
             var readTextureCoordinate = textureCoordBinding == VertexBasedShapeCompressedRepData.BINDING_PER_VERTEX;
             var readColor = colorBinding == VertexBasedShapeCompressedRepData.BINDING_PER_VERTEX;
@@ -149,9 +146,9 @@ namespace DLAT.JTReader {
                 quantizedVertexColorArray = new QuantizedVertexColorArray(data);
             vertexDataIndices = Int32CDP.ReadVecU32(data, PredictorType.PredStripIndex);  
         }
-        public List<double> GetVertices() {
-            List<double> unsortedVertices = quantizedVertexCoordArray.GetVertices();
-            List<double> sortedVertices = new List<double>();
+        public List<float> GetVertices() {
+            var unsortedVertices = quantizedVertexCoordArray.GetVertices();
+            var sortedVertices = new List<float>();
             foreach (int vertexIndex in vertexDataIndices) {
                 sortedVertices.Add(unsortedVertices[vertexIndex * 3]);
                 sortedVertices.Add(unsortedVertices[(vertexIndex * 3) + 1]);

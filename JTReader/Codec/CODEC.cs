@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
+using Joveler.Compression.XZ;
 
 namespace DLAT.JTReader {
     public static class CODEC {
-        public static List<double> Dequantize(List<int> vertexCoordinates, float[] vertexRange, int numberOfBits) {
+        public static List<float> Dequantize(List<int> vertexCoordinates, float[] vertexRange, int numberOfBits) {
             float minimum = vertexRange[0];
             float maximum = vertexRange[1];
             long maxCode = 0xffffffff;
@@ -12,11 +15,11 @@ namespace DLAT.JTReader {
                 maxCode = 0x1 << numberOfBits;
             }
 
-            double encodeMultiplier = (double)maxCode / (maximum - minimum);
+            float encodeMultiplier = maxCode / (maximum - minimum);
 
-            List<double> dequantizesVertices = new List<double>();
+            var dequantizesVertices = new List<float>();
             for (int i = 0; i < vertexCoordinates.Count; i++) {
-                dequantizesVertices.Add((((vertexCoordinates[i] - 0.5) / encodeMultiplier + minimum)));
+                dequantizesVertices.Add((((vertexCoordinates[i] - 0.5f) / encodeMultiplier + minimum)));
             }
             return dequantizesVertices;
         }
@@ -222,5 +225,33 @@ namespace DLAT.JTReader {
             ("F64",2), ("F64",3), ("F64",4),  ("F64",4),
             ("F64",9), ("F64",16)
         };
+
+        public static List<float> IntArrayToFloatArray(List<int> values) {
+            var res = new List<float>();
+            foreach (var val in values) 
+                res.Add(BitConverter.ToSingle(BitConverter.GetBytes(val), 0));
+            return res;
+        }
+        
+        public static Stream DecompressZLIB(Stream compressed) {
+            var deflate = new DeflateStream(compressed, CompressionMode.Decompress);
+            var decompressed = new MemoryStream();
+            deflate.CopyTo(decompressed);
+            deflate.Dispose();
+            decompressed.Position = 0;
+            return decompressed;
+        }
+        
+        public static Stream DecompressLZMA(Stream compressed) {
+            var xzDecompressOptions = new XZDecompressOptions();
+            xzDecompressOptions.BufferSize = 0;
+            var xz = new XZStream(compressed, xzDecompressOptions);
+            var decompressed = new MemoryStream();
+            xz.CopyTo(decompressed);
+            xz.Dispose();
+            decompressed.Position = 0;
+            return decompressed;
+        }
+        
     }
 }

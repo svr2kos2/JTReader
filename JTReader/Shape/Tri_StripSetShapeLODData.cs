@@ -18,6 +18,16 @@ namespace DLAT.JTReader {
             if (ele.majorVersion < 9) {
                 vertexBasedShapeData = new VertexBasedShapeCompressedRepData(data);
             }
+
+
+
+            Console.WriteLine(GetVertices().Count);
+        }
+        
+        public List<float> GetVertices() {
+            if(vertexBasedShapeData != null)
+                return vertexBasedShapeData.GetVertices();
+            return vertexShapeLodData.GetVertices();
         }
     }
 }

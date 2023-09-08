@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JTReader", "JTReader\JTRead
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JTReaderTest", "JTReaderTest\JTReaderTest.csproj", "{C23DA6B4-9FEE-46B2-87F1-E10D10888783}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TxKinSolverForUnity", "TxKinSolverForUnity\TxKinSolverForUnity.csproj", "{55B36E06-ECAD-4908-8F2F-9250CF6BE85C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +39,18 @@ Global
 		{C23DA6B4-9FEE-46B2-87F1-E10D10888783}.Debug|x64.ActiveCfg = Debug|x64
 		{C23DA6B4-9FEE-46B2-87F1-E10D10888783}.Debug|x64.Build.0 = Debug|x64
 		{C23DA6B4-9FEE-46B2-87F1-E10D10888783}.Release|x64.Build.0 = Release|x64
+		{55B36E06-ECAD-4908-8F2F-9250CF6BE85C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55B36E06-ECAD-4908-8F2F-9250CF6BE85C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55B36E06-ECAD-4908-8F2F-9250CF6BE85C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{55B36E06-ECAD-4908-8F2F-9250CF6BE85C}.Debug|x64.Build.0 = Debug|Any CPU
+		{55B36E06-ECAD-4908-8F2F-9250CF6BE85C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{55B36E06-ECAD-4908-8F2F-9250CF6BE85C}.Debug|x86.Build.0 = Debug|Any CPU
+		{55B36E06-ECAD-4908-8F2F-9250CF6BE85C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55B36E06-ECAD-4908-8F2F-9250CF6BE85C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55B36E06-ECAD-4908-8F2F-9250CF6BE85C}.Release|x64.ActiveCfg = Release|Any CPU
+		{55B36E06-ECAD-4908-8F2F-9250CF6BE85C}.Release|x64.Build.0 = Release|Any CPU
+		{55B36E06-ECAD-4908-8F2F-9250CF6BE85C}.Release|x86.ActiveCfg = Release|Any CPU
+		{55B36E06-ECAD-4908-8F2F-9250CF6BE85C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

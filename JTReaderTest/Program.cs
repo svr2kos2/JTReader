@@ -28,7 +28,7 @@ namespace JTReaderTest {
             //var jtFile = "E:\\workspace\\JTFiles\\opening_protection_plate1_jt9.5.jt";
             //var jtFile = "E:\\workspace\\JTFiles\\example_block_jt10.3.jt";
             //var jtFile = "E:\\workspace\\JTFiles\\gre_he_30d004003_jt10.0.jt";
-
+            
             //var jf =
             //    "C:\\Users\\root\\Desktop\\share\\LIB_ROOT\\Hefei\\VW316_8CM\\02_UB2\\U2A1\\KONZEPT_BEMI\\WERKZEUGE\\ZUBEHOER\\UB2 Camera for respot  20220114.cojt\\UB2 Camera for respot  20220114.jt";
 
@@ -43,8 +43,9 @@ namespace JTReaderTest {
             
             
             //var jtFileDirectory = "C:\\Users\\root\\Desktop\\share\\LIB_ROOT";
-            //var jtFileDirectory = "E:\\workspace\\JTFiles";
-            var jtFileDirectory = "E:\\workspace\\JTDump";
+            //var jtFileDirectory = "E:\\workspace\\JTFiles\\robot";
+            var jtFileDirectory = "E:\\workspace\\JTFiles";
+            //var jtFileDirectory = "E:\\workspace\\JTDump";
             
             Queue<string> dirs = new Queue<string>();
             dirs.Enqueue(jtFileDirectory);
@@ -74,7 +75,7 @@ namespace JTReaderTest {
                     dirs.Enqueue(subDir);
             }
             ClearMemory();
-            DLAT.JTReader.Debug.Log("#gAll task created. waiting...#w");
+            //DLAT.JTReader.Debug.Log("#gAll task created. waiting...#w");
             
             Task.WaitAll(readers.ToArray());
 
@@ -100,7 +101,7 @@ namespace JTReaderTest {
             }
             
             
-            DLAT.JTReader.Debug.Log("#gAll completed.#w" + (DateTime.Now - startTime).TotalSeconds);
+            //DLAT.JTReader.Debug.Log("#gAll completed.#w" + (DateTime.Now - startTime).TotalSeconds);
             //
             // foreach (var reader in readers) {
             //     var task = reader;

@@ -25,5 +25,10 @@ namespace DLAT.JTReader {
         public override string ToString() {
             return "date: " + date.ToString();
         }
+        
+        //重载DateTime 类型
+        public static implicit operator DateTime(DatePropertyAtomData data) {
+            return data.date;
+        }
     }
 }

@@ -124,9 +124,10 @@ namespace DLAT.JTReader {
         }
         public static List<int> ReadVecU32(Stream data, PredictorType predictorType) {
             var unpackedList = ReadVecI32(data, predictorType);
-            for (var i = 0; i < unpackedList.Count; i++) {
-                unpackedList[i] = unpackedList[i] & 0xffff;
-            }
+            // for (var i = 0; i < unpackedList.Count; i++) {
+            //     var f = BitConverter.ToSingle(BitConverter.GetBytes(unpackedList[i]), 0);
+            //     unpackedList[i] = unpackedList[i] & 0xffff;
+            // }
             return unpackedList;
         }
         private static int PredictValue(List<int> values, int index, PredictorType predictorType) {

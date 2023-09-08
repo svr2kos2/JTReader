@@ -54,7 +54,7 @@ namespace DLAT.JTReader {
             //----Segment Header----
 
             if (segmentType == 0) {
-                Debug.Log("#rFound segment type 0, skipped.#w");
+                //Debug.Log("#rFound segment type 0, skipped.#w");
                 return;
             }
             
@@ -69,10 +69,10 @@ namespace DLAT.JTReader {
                 if (compressionFlag == 2 && compressionAlgorithm == 2) {
                     compressed = true;
                     pos += 2; //skip zlib header
-                    dataStream = DecompressZLIB(new MemoryStream(fb, (int)pos, compressedLength - 2));
+                    dataStream = CODEC.DecompressZLIB(new MemoryStream(fb, (int)pos, compressedLength - 2));
                 } else if (compressionFlag == 3 && compressionAlgorithm == 3) {
                     compressed = true;
-                    dataStream = DecompressLZMA(new MemoryStream(fb, (int)pos, compressedLength));
+                    dataStream = CODEC.DecompressLZMA(new MemoryStream(fb, (int)pos, compressedLength));
                 } else
                     throw new Exception("unknown compress method");
             }
@@ -108,24 +108,6 @@ namespace DLAT.JTReader {
             //          segmentLength + " end:" + (fs.Position + segmentLength) + "| dataLen:" + dataStream.Length);
         }
 
-        public Stream DecompressZLIB(Stream compressed) {
-            var deflate = new DeflateStream(compressed, CompressionMode.Decompress);
-            var decompressed = new MemoryStream();
-            deflate.CopyTo(decompressed);
-            deflate.Dispose();
-            decompressed.Position = 0;
-            return decompressed;
-        }
         
-        public Stream DecompressLZMA(Stream compressed) {
-            var xzDecompressOptions = new XZDecompressOptions();
-            xzDecompressOptions.BufferSize = 0;
-            var xz = new XZStream(compressed, xzDecompressOptions);
-            var decompressed = new MemoryStream();
-            xz.CopyTo(decompressed);
-            xz.Dispose();
-            decompressed.Position = 0;
-            return decompressed;
-        }
     }
 }

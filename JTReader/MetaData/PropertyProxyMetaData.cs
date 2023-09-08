@@ -35,10 +35,12 @@ namespace DLAT.JTReader {
                     else throw new NotImplementedException();
                 };
                 var val = valueFunc();
-                //Debug.Log("Type:#g" + type + "#w Key:" + key,2);
-                //Debug.Log(" Value:" + val, 3);
+                //Debug.Log("Type:#g" + type + "#w Key:" + key);
+                //Debug.Log(" Value:" + val, 1);
                 property.Add(key, (type, val));
-                
+
+                if (key == "TxKinModelingBuffer")
+                    ele.segment.file.txKinModelingBuffer = val.ToString();
             }
         }
 
