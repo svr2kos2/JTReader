@@ -111,7 +111,13 @@
     <Compile Include="Codec\Int32CDP.cs" />
     <Compile Include="Codec\Int32CDP2.cs" />
     <Compile Include="Codec\Int32CDP3.cs" />
-    <Compile Include="Codec\MeshDecoder.cs" />
+    <Compile Include="Codec\Mesh\BitVector.cs" />
+    <Compile Include="Codec\Mesh\DualVFMesh.cs" />
+    <Compile Include="Codec\Mesh\DualVFMeshWrapper.cs" />
+    <Compile Include="Codec\Mesh\FaceEnt.cs" />
+    <Compile Include="Codec\Mesh\MeshCoderDriver.cs" />
+    <Compile Include="Codec\Mesh\MeshDecoder.cs" />
+    <Compile Include="Codec\Mesh\VtxEnt.cs" />
     <Compile Include="Codec\MoveToFront.cs" />
     <Compile Include="Common\ArrayReader.cs" />
     <Compile Include="Common\DataSegment.cs" />

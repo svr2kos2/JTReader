@@ -47,8 +47,19 @@ namespace DLAT.JTReader {
             else
                 return lossyQuantizedRawVertex.GetVertices();
         }
-        public List<int> GetIndices() {
-            return indices;
+        public List<List<int>> GetIndices() {
+            var res = new List<List<int>>();
+            var tri = new List<int>();
+            var normals = new List<int>();
+            for (var i = 1; i < indices.Count; ++i) {
+                for (var j = indices[i - 1]; j < indices[i] - 2; ++j) {
+                    var si = ((j - indices[i - 1]) % 2 == 0 ? new int[3] { 1, 0, 2 } : new int[3] { 0, 1, 2 }) ;
+                    tri.AddRange(new [] { j + si[0], j + si[1], j + si[2] });
+                }
+            }
+            res.Add(tri);
+            res.Add(tri);
+            return res;
         }
         public List<float> GetColors() {
             if (losslessCompressedRawVertex != null)

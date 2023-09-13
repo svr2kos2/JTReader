@@ -104,14 +104,14 @@ namespace DLAT.JTReader {
     }
     public class TextureCoordGenerationParameters {
         public int[] texCoordGenMode;
-        public PlanelF32[] texCoordReferencePlane;
+        public PlaneF32[] texCoordReferencePlane;
         public TextureCoordGenerationParameters(Stream data) {
             texCoordGenMode = new int[4];
-            texCoordReferencePlane = new PlanelF32[4];
+            texCoordReferencePlane = new PlaneF32[4];
             for (int i = 0; i < 4; ++i)
                 texCoordGenMode[i] = data.ReadI32();
             for (int i = 0; i < 4; ++i)
-                texCoordReferencePlane[i] = new PlanelF32(data);
+                texCoordReferencePlane[i] = new PlaneF32(data);
         }
     }
     public class InlineTextureImageData {

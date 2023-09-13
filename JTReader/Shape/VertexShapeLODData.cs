@@ -66,6 +66,12 @@ namespace DLAT.JTReader {
             var coordinateArray = topologicallyCompressedVertexRecords.compressedVertexCoordinateArray;
             return coordinateArray.vertexCoordinates;
         }
+
+        public List<List<int>> GetIndices() {
+            if(topoMeshCompressedLODData != null)
+                return topoMeshCompressedLODData.GetIndices();
+            return topoMeshTopologicallyCompressedLODData.GetIndices();
+        }
         
     }
 
@@ -109,6 +115,11 @@ namespace DLAT.JTReader {
             }
             return null;
         }
+
+        public List<List<int>> GetIndices() {
+            throw new NotImplementedException("");
+            return null;
+        }
         
     }
 
@@ -127,6 +138,10 @@ namespace DLAT.JTReader {
             var topologicallyCompressedVertexRecords = repData.vertexRecords;
             var coordinateArray = topologicallyCompressedVertexRecords.compressedVertexCoordinateArray;
             return coordinateArray.vertexCoordinates;
+        }
+
+        public List<List<int>> GetIndices() {
+            return repData.GetIndices();
         }
         
     }

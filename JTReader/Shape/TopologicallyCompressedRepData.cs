@@ -11,7 +11,7 @@ namespace DLAT.JTReader {
         public List<int[]> faceAttributeMasks30LSBs;
         public List<int> faceAttributeMasks8_30nextMSBs;
         public List<int> faceAttributeMask8_4MSBs;
-        public List<uint> highDegreeFaceAttributeMasks;
+        public long[] highDegreeFaceAttributeMasks;
         public List<int> splitFaceSyms;
         public List<int> splitFacePositions;
         public int compositeHash;
@@ -35,13 +35,25 @@ namespace DLAT.JTReader {
             faceAttributeMasks8_30nextMSBs = Int32CDP.ReadVecI32(data, PredictorType.PredNull);
             if(ele.majorVersion == 9)
                 faceAttributeMask8_4MSBs = Int32CDP.ReadVecI32(data, PredictorType.PredNull);
-            highDegreeFaceAttributeMasks = data.ReadVecU32();
-            List<int> splitFaceSyms      = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
-            List<int> splitFacePositions = Int32CDP.ReadVecI32(data, PredictorType.PredNull);
+            var _highDegreeFaceAttributeMasks = data.ReadVecU32();
+            highDegreeFaceAttributeMasks = new long[_highDegreeFaceAttributeMasks.Count];
+            for (int i = 0; i < _highDegreeFaceAttributeMasks.Count; ++i)
+                highDegreeFaceAttributeMasks[i] = _highDegreeFaceAttributeMasks[i];
+            splitFaceSyms      = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
+            splitFacePositions = Int32CDP.ReadVecI32(data, PredictorType.PredNull);
 
             long readHash = data.ReadU32();
             
             vertexRecords = new TopologicallyCompressedVertexRecords(data);
+        }
+
+        public List<List<int>> GetIndices() {
+            var meshCoderDriver = new MeshCoderDriver();
+            meshCoderDriver.setInputData(vertexValences, faceDegress,
+                vertexGroups, vertexFlags,
+                faceAttributeMasks30LSBs, faceAttributeMasks8_30nextMSBs, faceAttributeMask8_4MSBs,
+                highDegreeFaceAttributeMasks, splitFaceSyms, splitFacePositions);
+            return meshCoderDriver.decode();
         }
         
     }

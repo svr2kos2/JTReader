@@ -50,7 +50,7 @@ namespace JTReaderTest {
             Queue<string> dirs = new Queue<string>();
             dirs.Enqueue(jtFileDirectory);
 
-            var readers = new List<Task<LSG>>();
+            //var readers = new List<Task<LSG>>();
             
             
             for (; dirs.Count != 0;) {
@@ -59,12 +59,13 @@ namespace JTReaderTest {
                 foreach (var jtFile in files) {
                     if (jtFile.EndsWith(".jt")) {
                         var task = Task.Run(() => {
-                            var f = new JTFile(jtFile);
-                            var l =  new LSG(f);
-                            return l;
+                            
                         });
-                        task.Wait();
-                        readers.Add(task);
+                        var f = new JTFile(jtFile);
+                        var l =  new LSG(f);
+                        //return l;
+                        //task.Wait();
+                        //readers.Add(task);
                     }
                 }
 
@@ -77,7 +78,7 @@ namespace JTReaderTest {
             ClearMemory();
             //DLAT.JTReader.Debug.Log("#gAll task created. waiting...#w");
             
-            Task.WaitAll(readers.ToArray());
+            //Task.WaitAll(readers.ToArray());
 
             //for (;;) {
             //    Task.Delay(1000).Wait();
@@ -95,10 +96,10 @@ namespace JTReaderTest {
             //        break;
             //}
             
-            var lsgs = new List<LSG>();
-            foreach (var r in readers) {
-                lsgs.Add(r.Result);
-            }
+            // var lsgs = new List<LSG>();
+            // foreach (var r in readers) {
+            //     lsgs.Add(r.Result);
+            // }
             
             
             //DLAT.JTReader.Debug.Log("#gAll completed.#w" + (DateTime.Now - startTime).TotalSeconds);

@@ -114,7 +114,7 @@ namespace DLAT.JTReader {
             for (int i = 0; i < 16; i += 5)
                 raw[i] = 1;
             for (int i = 0; i < 16; ++i)
-                raw[i] = ((storedValuesMask << i) & 0x8000) == 0 ? 0 : data.ReadF32();
+                raw[i] = ((storedValuesMask << i) & 0x8000) == 0 ? raw[i] : data.ReadF32();
         }
 
         public Mx4F64 ToMx4F64() {
@@ -136,12 +136,12 @@ namespace DLAT.JTReader {
             for (int i = 0; i < 16; i += 5)
                 raw[i] = 1;
             for (int i = 0; i < 16; ++i)
-                raw[i] = ((storedValuesMask << i) & 0x8000) == 0 ? 0 : data.ReadF64();
+                raw[i] = ((storedValuesMask << i) & 0x8000) == 0 ? raw[i] : data.ReadF64();
         }
     }
-    public class PlanelF32 {
+    public class PlaneF32 {
         public float a, b, c, d;
-        public PlanelF32(Stream data) {
+        public PlaneF32(Stream data) {
             a = data.ReadF32();
             b = data.ReadF32();
             c = data.ReadF32();
@@ -356,11 +356,11 @@ namespace DLAT.JTReader {
         public static string GetTypeString(GUID typeID) {
             return typeStrings[typeID.ToString()];
         }
-        public static bool isEOE(string typeID) {
+        public static bool isEoe(string typeID) {
             return typeID == "FFFFFFFF-FFFF-FFFF-FF-FF-FF-FF-FF-FF-FF-FF";
         }
-        public static bool isEOE(GUID typeID) {
-            return isEOE(typeID.ToString());
+        public static bool isEoe(GUID typeID) {
+            return isEoe(typeID.ToString());
         }
 
     }

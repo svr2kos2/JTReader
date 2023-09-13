@@ -21,13 +21,25 @@ namespace DLAT.JTReader {
 
 
 
-            Console.WriteLine(GetVertices().Count);
+            Console.Write(GetVertices().Count + "    ");
+            var indices = GetIndices();
+            Console.Write(indices.Count + "    ");
+            foreach (var i in indices) {
+                Console.Write(i.Count + "  ");
+            }
+            Console.WriteLine();
         }
         
         public List<float> GetVertices() {
             if(vertexBasedShapeData != null)
                 return vertexBasedShapeData.GetVertices();
             return vertexShapeLodData.GetVertices();
+        }
+
+        public List<List<int>> GetIndices() {
+            if(vertexBasedShapeData != null)
+                return vertexBasedShapeData.GetIndices();
+            return vertexShapeLodData.GetIndices();
         }
     }
 }
