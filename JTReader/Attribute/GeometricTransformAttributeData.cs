@@ -14,7 +14,15 @@ namespace DLAT.JTReader {
             if (ele.majorVersion > 8)
                 version = data.ReadVersionNumber();
             ushort storedValuesMask = data.ReadU16();
-            matrix = ele.majorVersion < 10 ? new Mx4F32(data,storedValuesMask).ToMx4F64() : new Mx4F64(data, storedValuesMask);
+            var byteCount = 0;
+            for (var msk = storedValuesMask; msk != 0; msk >>= 1)
+                if ((msk & 1) != 0)
+                    byteCount += 6;
+            var remainBytes = data.Length - data.Position ;
+            var readF64 = false;
+            if (remainBytes > byteCount)
+                readF64 = true;
+            matrix = readF64 ? new Mx4F64(data,storedValuesMask) : new Mx4F32(data, storedValuesMask).ToMx4F64();
             base.ReadBaseAttributeDataFields2(data);
         }
 

@@ -160,7 +160,7 @@ namespace DLAT.JTReader {
         public List<int> octantCodes;
         public List<int> thetaCodes;
         public List<int> psiCodes;
-        public List<double> normals;
+        public List<float> normals;
         public QuantizedVertexNormalArray(Stream data) {
             numberOfBits = data.ReadByte();
             normalCount = data.ReadI32();
@@ -168,13 +168,13 @@ namespace DLAT.JTReader {
             octantCodes = Int32CDP.ReadVecU32(data, PredictorType.PredLag1);
             thetaCodes = Int32CDP.ReadVecU32(data, PredictorType.PredLag1);
             psiCodes = Int32CDP.ReadVecU32(data, PredictorType.PredLag1);
-            normals = new List<double>();
+            normals = new List<float>();
             var deeringCodec = new CODEC.DeeringNormalCodec(numberOfBits);
             for (int i = 0; i < psiCodes.Count; i++) {
                 var normal = deeringCodec.convertCodeToVec(sextantCodes[i], octantCodes[i], thetaCodes[i], psiCodes[i]);
-                normals.Add(normal.x);
-                normals.Add(normal.y);
-                normals.Add(normal.z);
+                normals.Add((float)normal.x);
+                normals.Add((float)normal.y);
+                normals.Add((float)normal.z);
             }
         }
     }

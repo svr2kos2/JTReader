@@ -115,7 +115,7 @@ namespace DLAT.JTReader {
         }
     }
     public class CompressedVertexNormalArray {
-        public List<double> normalCoordinates;
+        public List<float> normalCoordinates;
 
         public CompressedVertexNormalArray(Stream data) {
             if(data.FromJTFile().majorVersion == 9)
@@ -136,7 +136,7 @@ namespace DLAT.JTReader {
             var octantCodes = new List<int>();
             var thetaCodes = new List<int>();
             var psiCodes = new List<int>();
-            normalCoordinates = new List<double>();
+            normalCoordinates = new List<float>();
             var normalVectorLists = new List<List<int>>();
 
             if (quantizationBits == 0) {
@@ -173,9 +173,9 @@ namespace DLAT.JTReader {
                 for (int i = 0; i < psiCodes.Count; i++) {
                     var normal =
                         deeringCodec.convertCodeToVec(sextantCodes[i], octantCodes[i], thetaCodes[i], psiCodes[i]);
-                    normalCoordinates.Add(normal.x);
-                    normalCoordinates.Add(normal.y);
-                    normalCoordinates.Add(normal.z);
+                    normalCoordinates.Add((float)normal.x);
+                    normalCoordinates.Add((float)normal.y);
+                    normalCoordinates.Add((float)normal.z);
                 }
             }
             else {
@@ -189,16 +189,38 @@ namespace DLAT.JTReader {
             var normalCount = data.ReadI32();
             var numberComponents = data.ReadU8();
             var quantizationBits = data.ReadU8();
-
+            
+            var xValues = new List<float>();
+            var yValues = new List<float>();
+            var zValues = new List<float>();
             if (quantizationBits == 0) {
                 var binaryVertexNormals = new List<int>[numberComponents];
                 for (int i = 0; i < numberComponents; ++i)
                     binaryVertexNormals[i] = Int32CDP.ReadVecU32(data, PredictorType.PredNull);
+                xValues = CODEC.IntArrayToFloatArray(binaryVertexNormals[0]);
+                yValues = CODEC.IntArrayToFloatArray(binaryVertexNormals[1]);
+                zValues = CODEC.IntArrayToFloatArray(binaryVertexNormals[2]);
             }
             else {
                 var deeringNormalCodes = Int32CDP.ReadVecU32(data, PredictorType.PredNull);
+                var deeringCodec = new CODEC.DeeringNormalCodec(quantizationBits);
+                for (int i = 0; i < deeringNormalCodes.Count; i++) {
+                    var (sextant, octant, theta, psi) =
+                        deeringCodec.unpackCode((uint)deeringNormalCodes[i], quantizationBits);
+                    var normal = deeringCodec.convertCodeToVec(sextant, octant, theta, psi);
+                    xValues.Add((float)normal.x);
+                    yValues.Add((float)normal.y);
+                    zValues.Add((float)normal.z);
+                }
             }
 
+            normalCoordinates = new List<float>();
+            for (int i = 0; i < xValues.Count; i++) {
+                normalCoordinates.Add(xValues[i]);
+                normalCoordinates.Add(yValues[i]);
+                normalCoordinates.Add(zValues[i]);
+            }
+            
             var hash = data.ReadU32();
         }
         

@@ -72,7 +72,11 @@ namespace DLAT.JTReader {
                 return topoMeshCompressedLODData.GetIndices();
             return topoMeshTopologicallyCompressedLODData.GetIndices();
         }
-        
+        public List<float> GetNormals() {
+            if(topoMeshCompressedLODData != null)
+                return topoMeshCompressedLODData.GetNormals();
+            return topoMeshTopologicallyCompressedLODData.GetNormals();
+        }
     }
 
     public class TopoMeshLODData {
@@ -115,7 +119,17 @@ namespace DLAT.JTReader {
             }
             return null;
         }
-
+        
+        public List<float> GetNormals() {
+            if (repDataV1 != null)
+                return repDataV1.compressedVertexNormalArray.normalCoordinates;
+            if (repDataV2 != null) {
+                return repDataV2.
+                    topoMeshCompressedRepDataV1.compressedVertexNormalArray.normalCoordinates;
+            }
+            return null;
+        }
+        
         public List<List<int>> GetIndices() {
             throw new NotImplementedException("");
             return null;
@@ -139,7 +153,11 @@ namespace DLAT.JTReader {
             var coordinateArray = topologicallyCompressedVertexRecords.compressedVertexCoordinateArray;
             return coordinateArray.vertexCoordinates;
         }
-
+        public List<float> GetNormals() {
+            var topologicallyCompressedVertexRecords = repData.vertexRecords;
+            var coordinateArray = topologicallyCompressedVertexRecords.compressedVertexNormalArray;
+            return coordinateArray.normalCoordinates;
+        }
         public List<List<int>> GetIndices() {
             return repData.GetIndices();
         }

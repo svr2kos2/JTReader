@@ -47,6 +47,13 @@ namespace DLAT.JTReader {
             else
                 return lossyQuantizedRawVertex.GetVertices();
         }
+
+        public List<float> GetNormals() {
+            if (losslessCompressedRawVertex != null)
+                return losslessCompressedRawVertex.normals;
+            else
+                return lossyQuantizedRawVertex.GetVertices();
+        }
         public List<List<int>> GetIndices() {
             var res = new List<List<int>>();
             var tri = new List<int>();
@@ -166,6 +173,16 @@ namespace DLAT.JTReader {
                 sortedVertices.Add(unsortedVertices[(vertexIndex * 3) + 2]);
             }
             return sortedVertices;
+        }
+        public List<float> GetNormals() {
+            var unsortedNotmals = quantizedNormalArray.normals;
+            var sortedNormals = new List<float>();
+            foreach (int vertexIndex in vertexDataIndices) {
+                sortedNormals.Add(unsortedNotmals[vertexIndex * 3]);
+                sortedNormals.Add(unsortedNotmals[(vertexIndex * 3) + 1]);
+                sortedNormals.Add(unsortedNotmals[(vertexIndex * 3) + 2]);
+            }
+            return sortedNormals;
         }
         public List<float> GetColors() {
             List<float> res = new List<float>();

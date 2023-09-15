@@ -209,6 +209,21 @@ namespace DLAT.JTReader {
 
                 return new DirF64(x, y, z);
             }
+
+
+            public (uint,uint,uint,uint) unpackCode(uint code, int numBits) {
+                uint outSextant;
+                uint outOctant;
+                uint outTheta;
+                uint outPsi;
+                var mask = (1u << numBits) - 1u;
+                outSextant = (code >> (numBits+numBits+3)) & 0x7;
+                outOctant = (code >> (numBits+numBits)) & 0x7;
+                outTheta = (code >> (numBits)) & mask;
+                outPsi = (code) & mask;
+                return (outSextant,outOctant,outTheta,outPsi);
+            } 
+            
         }
         public static readonly (string,int)[] fieldTypeData = new (string,int)[]{
             ("empty",0),

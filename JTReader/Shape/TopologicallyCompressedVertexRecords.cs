@@ -22,12 +22,12 @@ namespace DLAT.JTReader {
             }
 
             //CompressedVertexNormalArray compressedVertexNormalArray = null;
-            if ((vertexBindings & 0x08) != 0) { // Check for bit 4
+            if ((vertexBindings.Normal()) != 0) { // Check for bit 4
                 compressedVertexNormalArray = new CompressedVertexNormalArray(data);
             }
 
             //CompressedVertexColorArray compressedVertexColorArray = null;
-            if ((vertexBindings & 0x30) != 0) { // Check for bits 5-6
+            if ((vertexBindings.Color()) != 0) { // Check for bits 5-6
                 compressedVertexColorArray = new CompressedVertexColorArray(data);
             }
             
