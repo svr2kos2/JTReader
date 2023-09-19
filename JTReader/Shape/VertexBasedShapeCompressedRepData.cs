@@ -22,7 +22,7 @@ namespace DLAT.JTReader {
         public LosslessCompressedRawVertexData losslessCompressedRawVertex;
         public LossyQuantizedRawVertexData lossyQuantizedRawVertex;
         
-        public VertexBasedShapeCompressedRepData(Stream data) {
+        public VertexBasedShapeCompressedRepData(StreamReader data) {
             versionNumber = data.ReadI16();
             normalBinding = data.ReadU8();
             if (normalBinding > 3)
@@ -81,7 +81,7 @@ namespace DLAT.JTReader {
         public List<float> colors;
         public List<float> normals;
         public List<float> vertices;
-        public LosslessCompressedRawVertexData(Stream data,int textureCoordBinding, int colorBinding, int normalBinding) {
+        public LosslessCompressedRawVertexData(StreamReader data,int textureCoordBinding, int colorBinding, int normalBinding) {
             var uncompressedDataSize = data.ReadI32();
             var compressedDataSize = data.ReadI32();
             float[] rawVertexData = null;
@@ -97,7 +97,7 @@ namespace DLAT.JTReader {
             } else if(compressedDataSize > 0) {
                 var zlibHeader = data.ReadBytes(2);
                 var compressedBytes = new MemoryStream(data.ReadBytes(compressedDataSize - 2));
-                var uncompressedStream = CODEC.DecompressZLIB(compressedBytes);
+                var uncompressedStream = new StreamReader(CODEC.DecompressZLIB(compressedBytes), data.jtFile);
                 if (uncompressedStream.Length != uncompressedDataSize) {
                     throw new Exception("ZLIB decompression seems to be failed! Expected length: " + uncompressedDataSize + " -> resulting length: " + uncompressedStream.Length);
                 }
@@ -154,7 +154,7 @@ namespace DLAT.JTReader {
         public QuantizedVertexTextureCoordArray quantizedTextureCoordArray;
         public QuantizedVertexColorArray quantizedVertexColorArray;
         public List<int> vertexDataIndices;
-        public LossyQuantizedRawVertexData(Stream data, int textureCoordBinding,int colorBinding,int normalBinding) {
+        public LossyQuantizedRawVertexData(StreamReader data, int textureCoordBinding,int colorBinding,int normalBinding) {
             quantizedVertexCoordArray = new QuantizedVertexCoordArray(data);
             if(normalBinding !=0)
                 quantizedNormalArray = new QuantizedVertexNormalArray(data);

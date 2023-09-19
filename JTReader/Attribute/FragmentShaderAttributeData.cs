@@ -22,7 +22,7 @@ namespace DLAT.JTReader {
         public string sourceCode;
         public ShaderParameter[] shaderParameters;
 
-        public BaseShaderData(Stream data) {
+        public BaseShaderData(StreamReader data) {
             version = data.ReadVersionNumber();
             shaderLanguage = data.ReadI32();
             inlineSourceFlag = data.ReadU32();
@@ -45,7 +45,7 @@ namespace DLAT.JTReader {
         public uint reservedField;
         public uint[] value;
 
-        public ShaderParameter(Stream data) {
+        public ShaderParameter(StreamReader data) {
             paramName = data.ReadMbString();
             paramType = data.ReadI32();
             valueClass = data.ReadU32();

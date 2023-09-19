@@ -54,7 +54,10 @@ namespace JTReader.Common {
             return Encoding.Unicode.GetString(ReadBytes(data,ref pos, len * 2));
         }
         public static RGBA ReadRGBA(this byte[] data,ref long pos) {
-            return new RGBA(new MemoryStream(ReadBytes(data, ref pos, 16)));
+            return new RGBA(BitConverter.ToSingle(data,(int)(pos + 0)),
+                BitConverter.ToSingle(data,(int)(pos + 4)),
+                BitConverter.ToSingle(data,(int)(pos + 8)),
+                BitConverter.ToSingle(data,(int)(pos + 12)));
         }
         public static List<int> ReadVecI32(this byte[] data, ref long pos) {
             var count = data.ReadI32(ref pos);

@@ -11,14 +11,14 @@ namespace DLAT.JTReader {
         private long _offset;
         private long _position;
         private long _length;
-        private Stream _byteStream;
+        private StreamReader _byteStream;
 
-        public JTFile fromJTFile => _byteStream.FromJTFile();
+        public JTFile fromJTFile => _byteStream.jtFile;
 
         public long Length => _length;
         public long Position => _position - _offset;
 
-        public BitStream(Stream stream, int bitLength = -1) {
+        public BitStream(StreamReader stream, int bitLength = -1) {
             _byteStream = stream;
             _offset = stream.Position << 3;
             _position = _offset;
@@ -33,7 +33,7 @@ namespace DLAT.JTReader {
             _byteStream.Position = _position / 8;
             var bytesLen = (_position + bitLnegth - 1) / 8 - _byteStream.Position + 1;
             var bytes = new byte[bytesLen];
-            _ = _byteStream.Read(bytes, 0, bytes.Length);
+            _ = _byteStream.BaseStream.Read(bytes, 0, bytes.Length);
             return bytes;
         }
         

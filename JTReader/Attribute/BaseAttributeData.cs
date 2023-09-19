@@ -25,7 +25,7 @@ namespace DLAT.JTReader {
                 fieldFinalFlags = data.ReadU32();
         }
 
-        public void ReadBaseAttributeDataFields2(Stream data) {
+        public void ReadBaseAttributeDataFields2(StreamReader data) {
             if (version == 2)
                 v2PaletteIndex = data.ReadU32();
         }

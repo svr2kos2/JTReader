@@ -73,7 +73,7 @@ namespace DLAT.JTReader {
         public float bottom;
         public float left;
         public float top;
-        public TextBox(Stream data) {
+        public TextBox(StreamReader data) {
             originX = data.ReadF32();
             originY = data.ReadF32();
             right = data.ReadF32();
@@ -85,7 +85,7 @@ namespace DLAT.JTReader {
     public struct TextPolylineData {
         public short[] polylineSegmentIndex;
         public List<float> polylineVertexCoords;
-        public TextPolylineData(Stream data) {
+        public TextPolylineData(StreamReader data) {
             var count = data.ReadI32();
             polylineSegmentIndex = new short[count];
             for (int i = 0; i < count; ++i)
@@ -97,7 +97,7 @@ namespace DLAT.JTReader {
         public short[] polylineSegmentIndex;
         public short[] polylineType;
         public List<float> polylineVertexCoords;
-        public NonTextPolylineData(Stream data, byte version) {
+        public NonTextPolylineData(StreamReader data, byte version) {
             var count = data.ReadI32();
             polylineSegmentIndex = new short[count];
             for (int i = 0; i < count; ++i)

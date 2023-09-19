@@ -6,119 +6,103 @@ using System.IO;
 using System.Text;
 
 namespace DLAT.JTReader {
-    public static class StreamReader {
-        private static ConcurrentDictionary<Stream, JTFile> _fromJTFile = new ConcurrentDictionary<Stream, JTFile>();
-        private static ConcurrentDictionary<Stream, BinaryReader> binaryReader = new ConcurrentDictionary<Stream, BinaryReader>();
-        public static JTFile FromJTFile(this Stream stream, JTFile setFile = null) {
-            if (_fromJTFile.ContainsKey(stream)) {
-                if (setFile == null)
-                    return _fromJTFile[stream];
-                else {
-                    _fromJTFile[stream] = setFile;
-                    return setFile;
-                }
-            }
-            if (setFile == null)
-                throw new Exception("JTFile order not set");
-            _fromJTFile.TryAdd(stream, setFile);
-            return setFile;
+    public class StreamReader {
+        private BinaryReader binReader;
+        public readonly JTFile jtFile;
+
+        public StreamReader(Stream stream, JTFile file) {
+            stream.Position = 0;
+            binReader = new BinaryReader(stream);
+            jtFile = file;
         }
 
-        public static void RemoveJTFileBind(this Stream stream) {
-            if (_fromJTFile.ContainsKey(stream))
-                _fromJTFile.TryRemove(stream, out var res);
+        public long Position {
+            get => binReader.BaseStream.Position;
+            set => binReader.BaseStream.Position = value;
         }
-
-        public static BinaryReader GetReader(Stream stream) {
-            if (!binaryReader.ContainsKey(stream))
-                binaryReader.TryAdd(stream, new BinaryReader(stream));
-            return binaryReader[stream];
-        }
+        public long Length => binReader.BaseStream.Length;
+        public Stream BaseStream => binReader.BaseStream;
         
-        public static byte[] ReadBytes(this Stream stream, int count, int padEnd = 0) {
-            var buffer = new byte[count + padEnd];
-            var read = stream.Read(buffer, 0, count);
-            if (read < count)
-                throw new Exception("Over read");
-            return buffer;
+        public byte[] ReadBytes(int count, int padEnd = 0) {
+            return binReader.ReadBytes(count);
         }
-        public static byte[] ReadBytes(this Stream stream, long pos, int count, int padEnd = 0) {
-            stream.Position = pos;
-            return ReadBytes(stream, count);
+        public byte[] ReadBytes(long pos, int count, int padEnd = 0) {
+            binReader.BaseStream.Position = pos;
+            return ReadBytes(count);
         }
-        public static byte ReadU8(this Stream stream) {
-            return GetReader(stream).ReadByte();
+        public byte ReadU8() {
+            return binReader.ReadByte();
         }
-        public static short ReadI16(this Stream stream) {
-            return GetReader(stream).ReadInt16();
+        public short ReadI16() {
+            return binReader.ReadInt16();
         }
-        public static ushort ReadU16(this Stream stream) {
-            return GetReader(stream).ReadUInt16();
+        public ushort ReadU16() {
+            return binReader.ReadUInt16();
         }
-        public static int ReadI32(this Stream stream) {
-            return GetReader(stream).ReadInt32();
+        public int ReadI32() {
+            return binReader.ReadInt32();
         }
-        public static uint ReadU32(this Stream stream) {
-            return GetReader(stream).ReadUInt32();
+        public uint ReadU32() {
+            return binReader.ReadUInt32();
         }
-        public static long ReadI64(this Stream stream) {
-            return GetReader(stream).ReadInt64();
+        public long ReadI64() {
+            return binReader.ReadInt64();
         }
-        public static ulong ReadU64(this Stream stream) {
-            return GetReader(stream).ReadUInt64();
+        public ulong ReadU64() {
+            return binReader.ReadUInt64();
         }
-        public static GUID ReadGUID(this Stream stream) {
-            return new GUID(ReadBytes(stream, 16));
+        public GUID ReadGUID() {
+            return new GUID(binReader.ReadBytes(16));
         }
-        public static float ReadF32(this Stream stream) {
-            return GetReader(stream).ReadSingle();
+        public float ReadF32() {
+            return binReader.ReadSingle();
         }
-        public static double ReadF64(this Stream stream) {
-            return GetReader(stream).ReadDouble();
+        public double ReadF64() {
+            return binReader.ReadDouble();
         }
-        public static string ReadString(this Stream stream) {
-            return ReadString(stream, stream.ReadI32());
+        public string ReadString() {
+            return ReadString(ReadI32());
         }
-        public static string ReadString(this Stream stream, int len) {
-            var str = Encoding.UTF8.GetString(ReadBytes(stream, len));
+        public string ReadString(int len) {
+            var str = Encoding.UTF8.GetString(binReader.ReadBytes(len));
             //Debug.Log(str + Debug.StackTrace(1));
             return str;
         }
-        public static string ReadMbString(this Stream stream) {
-            var len = stream.ReadI32();
-            var bytes = ReadBytes(stream, len * 2);
+        public string ReadMbString() {
+            var len = ReadI32();
+            var bytes = binReader.ReadBytes(len * 2);
             var str = Encoding.Unicode.GetString(bytes);
             //Debug.Log(str + Debug.StackTrace(1));
             return str;
         }
-        public static RGBA ReadRGBA(this Stream stream) {
-            return new RGBA(stream);
+        public RGBA ReadRGBA() {
+            return new RGBA(this);
         }
-        public static List<int> ReadVecI32(this Stream data) {
-            var count = data.ReadI32();
+        public List<int> ReadVecI32() {
+            var count = binReader.ReadInt32();
             var res = new List<int>(count);
             for (int i = 0; i < count; ++i)
-                res.Add(data.ReadI32());
+                res.Add(binReader.ReadInt32());
             return res;
         }
-        public static List<uint> ReadVecU32(this Stream data) {
-            var count = data.ReadI32();
+        public List<uint> ReadVecU32() {
+            var count = binReader.ReadInt32();
             var res = new List<uint>(count);
             for (int i = 0; i < count; ++i)
-                res.Add(data.ReadU32());
+                res.Add(binReader.ReadUInt32());
             return res;
         }
-        public static List<float> ReadVecF32(this Stream data) {
-            var count = data.ReadI32();
+        public List<float> ReadVecF32() {
+            var count = binReader.ReadInt32();
             var res = new List<float>(count);
             for (int i = 0; i < count; ++i)
-                res.Add(data.ReadF32());
+                res.Add(binReader.ReadSingle());
             return res;
         }
 
-        public static byte ReadVersionNumber(this Stream data) {
-            var jt = data.FromJTFile();
-            return jt.majorVersion > 9 ? data.ReadU8() : (byte)data.ReadI16();
+        public byte ReadVersionNumber() {
+            var jt = jtFile;
+            return jt.majorVersion > 9 ? binReader.ReadByte() : (byte)binReader.ReadInt16();
         }
         
     }

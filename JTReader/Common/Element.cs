@@ -10,7 +10,7 @@ namespace DLAT.JTReader {
         public DataSegment segment;
         public GUID objectTypeID;
         public int objectID = -1;
-        public Stream dataStream;
+        public StreamReader dataStream;
         public Type elementType;
 
         private object _elementData;
@@ -49,9 +49,8 @@ namespace DLAT.JTReader {
             //Debug.cache = true;
             
             //dataStream = stream;
-            dataStream = new MemoryStream(stream.ReadBytes(elementLength - (int)(stream.Position - begin), 1));
-            dataStream.FromJTFile(stream.FromJTFile());
-            dataStream.Position = 0;
+            dataStream = new StreamReader(new MemoryStream(stream.ReadBytes(elementLength - (int)(stream.Position - begin), 1)),
+                segment.file);
             if (!ObjectTypeIdentifiers.types.ContainsKey(objectTypeID)) {
                 dataStream = null;   
                 return;

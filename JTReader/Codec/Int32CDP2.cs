@@ -11,7 +11,7 @@ namespace DLAT.JTReader {
         public const int CODECTYPE_ARITHMETIC = 3;
         public const int CODECTYPE_CHOPPER = 4;
 
-        public static int[] DecodeBytes(Stream data) {
+        public static int[] DecodeBytes(StreamReader data) {
             var decodedSymbols = new List<int>();
             var valueCount = data.ReadI32();
             if (valueCount <= 0)
@@ -48,7 +48,7 @@ namespace DLAT.JTReader {
             var codeText = new byte[intsToRead * 4];
             for (int i = 0; i < intsToRead; i++) {
                 byte[] buffer = data.ReadBytes(4);
-                if (data.FromJTFile().byteOrder == 0) {
+                if (data.jtFile.byteOrder == 0) {
                     codeText[i * 4] = buffer[3];
                     codeText[(i * 4) + 1] = buffer[2];
                     codeText[(i * 4) + 2] = buffer[1];
@@ -78,7 +78,7 @@ namespace DLAT.JTReader {
                 valueElementCount = valueCount,
                 SymbolCount = -1,
                 int32ProbabilityContexts = int32ProbabilityContexts,
-                bitSteam = new BitStream(new MemoryStream(codeText), codeTextLength),
+                bitSteam = new BitStream(new StreamReader(new MemoryStream(codeText),data.jtFile), codeTextLength),
                 bitsRead = 0,
                 outOfBandValues = outOfBandValues,
             };

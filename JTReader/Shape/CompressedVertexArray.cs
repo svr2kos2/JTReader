@@ -6,15 +6,15 @@ namespace DLAT.JTReader {
     public class CompressedVertexCoordinateArray {
         public List<float> vertexCoordinates;
 
-        public CompressedVertexCoordinateArray(Stream data) {
-            if (data.FromJTFile().majorVersion == 9)
+        public CompressedVertexCoordinateArray(StreamReader data) {
+            if (data.jtFile.majorVersion == 9)
                 ReadV9(data);
             else
                 ReadV10(data);
 
         }
 
-        void ReadV9(Stream data) {
+        void ReadV9(StreamReader data) {
             int uniqueVertexCount = data.ReadI32();
             int numberComponents = data.ReadU8();
             PointQuantizerData pointQuantizerData = new PointQuantizerData(data);
@@ -69,7 +69,7 @@ namespace DLAT.JTReader {
             long readHash = data.ReadU32();
         }
 
-        void ReadV10(Stream data) {
+        void ReadV10(StreamReader data) {
             int uniqueVertexCount = data.ReadI32();
             int numberComponents = data.ReadU8();
             PointQuantizerData pointQuantizerData = new PointQuantizerData(data);
@@ -117,15 +117,15 @@ namespace DLAT.JTReader {
     public class CompressedVertexNormalArray {
         public List<float> normalCoordinates;
 
-        public CompressedVertexNormalArray(Stream data) {
-            if(data.FromJTFile().majorVersion == 9)
+        public CompressedVertexNormalArray(StreamReader data) {
+            if(data.jtFile.majorVersion == 9)
                 ReadV9(data);
             else {
                 ReadV10(data);
             }
         }
 
-        public void ReadV9(Stream data) {
+        public void ReadV9(StreamReader data) {
             var normalCount = data.ReadI32();
             var numberComponents = data.ReadU8();
             var quantizationBits = data.ReadU8();
@@ -185,7 +185,7 @@ namespace DLAT.JTReader {
             var hash = data.ReadU32();
         }
 
-        public void ReadV10(Stream data) {
+        public void ReadV10(StreamReader data) {
             var normalCount = data.ReadI32();
             var numberComponents = data.ReadU8();
             var quantizationBits = data.ReadU8();
@@ -228,7 +228,7 @@ namespace DLAT.JTReader {
     public class CompressedVertexColorArray {
         public List<double> colorValues;
 
-        public CompressedVertexColorArray(Stream data) {
+        public CompressedVertexColorArray(StreamReader data) {
             var colorCount = data.ReadI32();
             var numberComponents = data.ReadU8();
             var quantizationBits = data.ReadU8();
@@ -244,7 +244,7 @@ namespace DLAT.JTReader {
 
             if (quantizationBits == 0) {
                 for (int i = 0; i < numberComponents; i++) {
-                    if (data.FromJTFile().majorVersion < 10) {
+                    if (data.jtFile.majorVersion < 10) {
                         List<int> exponents = Int32CDP.ReadVecU32(data, PredictorType.PredNull);
                         List<int> mantissae = Int32CDP.ReadVecU32(data, PredictorType.PredNull);
                         List<int> codeData = new List<int>();
@@ -275,7 +275,7 @@ namespace DLAT.JTReader {
             else {
                 var colorQuantizerData = new ColorQuantizerData(data);
 
-                if (data.FromJTFile().majorVersion == 9) {
+                if (data.jtFile.majorVersion == 9) {
                     hueRedCodes    = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
                     satGreenCodes  = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
                     valueBlueCodes = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
@@ -301,7 +301,7 @@ namespace DLAT.JTReader {
     public class CompressedVertexTextureCoordinateArray {
         public List<double> textureCoordinates;
 
-        public CompressedVertexTextureCoordinateArray(Stream data) {
+        public CompressedVertexTextureCoordinateArray(StreamReader data) {
             int textureCoordCount = data.ReadI32();
 		    int numberComponents  = data.ReadU8();
 		    int quantizationBits  = data.ReadU8();
@@ -358,7 +358,7 @@ namespace DLAT.JTReader {
     public class CompressedVertexFlagArray {
         public List<int> vertexFlags;
 
-        public CompressedVertexFlagArray(Stream data) {
+        public CompressedVertexFlagArray(StreamReader data) {
             var count = data.ReadI32();
             vertexFlags = Int32CDP.ReadVecU32(data, PredictorType.PredNull);
         }

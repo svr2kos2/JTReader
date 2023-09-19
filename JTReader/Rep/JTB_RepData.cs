@@ -45,7 +45,7 @@ namespace DLAT.JTReader {
         public int coedgeCount;
         public int edgeCount;
         public int vertexCount;
-        public TopologicalEntityCount(Stream data) {
+        public TopologicalEntityCount(StreamReader data) {
             regionCount = data.ReadI32();
             shellCount = data.ReadI32();
             faceCount = data.ReadI32();
@@ -60,7 +60,7 @@ namespace DLAT.JTReader {
         public int PCSCurveCount;
         public int MCSCurveCount;
         public int pointCount;
-        public GeometricEntityCount(Stream data) {
+        public GeometricEntityCount(StreamReader data) {
             surfaceCount = data.ReadI32();
             PCSCurveCount = data.ReadI32();
             MCSCurveCount = data.ReadI32();
@@ -96,7 +96,7 @@ namespace DLAT.JTReader {
         public List<int> firstShellIndices;
         public List<int> lastShellIndices;
         public List<int> regionTags;
-        public RegionsTopologyData(Stream data) {
+        public RegionsTopologyData(StreamReader data) {
             firstShellIndices = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
             lastShellIndices = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
             regionTags = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
@@ -107,7 +107,7 @@ namespace DLAT.JTReader {
         public List<int> lastFaceIndices;
         public List<int> shellTags;
         public List<int> shellAntiHoleFlags;
-        public ShellsTopologyData(Stream data) {
+        public ShellsTopologyData(StreamReader data) {
             firstFaceIndices = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
             lastFaceIndices = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
             shellTags = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
@@ -120,7 +120,7 @@ namespace DLAT.JTReader {
         public List<int> surfaceIndices;
         public List<int> faceTags;
         public List<int> faceReverseNormalFlags;
-        public FacesTopologyData(Stream data) {
+        public FacesTopologyData(StreamReader data) {
             firstTrimLoopIndices = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
             lastTrimLoopIndices = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
             surfaceIndices = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
@@ -133,7 +133,7 @@ namespace DLAT.JTReader {
         public List<int> lastCoedgeIndices;
         public List<int> loopTags;
         public List<int> antiHoleFlags;
-        public LoopsTopologyData(Stream data) {
+        public LoopsTopologyData(StreamReader data) {
             firstCoedgeIndices = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
             lastCoedgeIndices = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
             loopTags = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
@@ -145,7 +145,7 @@ namespace DLAT.JTReader {
         public List<int> PCSCurveIndices;
         public List<int> coEdgeTags;
         public List<int> MCSCurveReversedFlags;
-        public CoedgesTopologyData(Stream data) {
+        public CoedgesTopologyData(StreamReader data) {
             edgeIndices = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
             PCSCurveIndices = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
             coEdgeTags = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
@@ -157,7 +157,7 @@ namespace DLAT.JTReader {
         public List<int> endVertexIndices;
         public List<int> MCSCurveIndices;
         public List<int> edgeTags;
-        public EdgesTopologyData(Stream data) {
+        public EdgesTopologyData(StreamReader data) {
             startVertexIndices = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
             endVertexIndices = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
             MCSCurveIndices = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
@@ -167,7 +167,7 @@ namespace DLAT.JTReader {
     public class VerticesTopologyData {
         public List<int> pointIndices;
         public List<int> vertexTags;
-        public VerticesTopologyData(Stream data) {
+        public VerticesTopologyData(StreamReader data) {
             pointIndices = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
             vertexTags = Int32CDP.ReadVecI32(data, PredictorType.PredLag1);
         }
@@ -176,7 +176,7 @@ namespace DLAT.JTReader {
 
     public class CompressedEntityListForNonTrivialVectorData {
         public List<int> entitiesOfKnotTypeExistFlags;
-        public CompressedEntityListForNonTrivialVectorData(Stream data) {
+        public CompressedEntityListForNonTrivialVectorData(StreamReader data) {
             entitiesOfKnotTypeExistFlags = data.ReadVecI32();
             List<int>[] entityIndexCodes = new List<int>[4];
             for (int i = 0; i < 4; i++) {
@@ -190,7 +190,7 @@ namespace DLAT.JTReader {
         public int weightsCount;
         List<int> weightIndices;
         List<int> weightValues;
-        public CompressedControlPointWeightsData(Stream data) {
+        public CompressedControlPointWeightsData(StreamReader data) {
             weightsCount = data.ReadI32();
             weightIndices = Int32CDP.ReadVecI32(data, PredictorType.PredStride1);
             //weightValues = Int32CDP(data, PredictorType.PredLag1);

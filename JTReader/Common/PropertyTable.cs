@@ -5,12 +5,13 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using StreamReader = DLAT.JTReader.StreamReader;
 
 namespace JTReader {
     public class PropertyTable {
         public short versionNumber;
         public Dictionary<int, NodePropertyTable> nodePropertyTable;
-        public PropertyTable(Stream data) {
+        public PropertyTable(StreamReader data) {
             versionNumber = data.ReadI16();
             var nodePropertyTableCount = data.ReadI32();
             nodePropertyTable = new Dictionary<int, NodePropertyTable>();
@@ -23,7 +24,7 @@ namespace JTReader {
     }
     public class NodePropertyTable {
         public Dictionary<int, int> propertyAtomObjectID;
-        public NodePropertyTable(Stream data) {
+        public NodePropertyTable(StreamReader data) {
             propertyAtomObjectID = new Dictionary<int, int>();
             for (; ; ) {
                 var key = data.ReadI32();

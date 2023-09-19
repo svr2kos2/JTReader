@@ -8,7 +8,7 @@ namespace DLAT.JTReader {
         public float max;
         public int numberOfBits;
 
-        public UniformQuantizerData(Stream data) {
+        public UniformQuantizerData(StreamReader data) {
             min = data.ReadF32();
             max = data.ReadF32();
             numberOfBits = data.ReadU8();
@@ -21,7 +21,7 @@ namespace DLAT.JTReader {
         public UniformQuantizerData yUniformQuantizerData;
         public UniformQuantizerData zUniformQuantizerData;
 
-        public PointQuantizerData(Stream data) {
+        public PointQuantizerData(StreamReader data) {
             xUniformQuantizerData = new UniformQuantizerData(data);
             yUniformQuantizerData = new UniformQuantizerData(data);
             zUniformQuantizerData = new UniformQuantizerData(data);
@@ -59,7 +59,7 @@ namespace DLAT.JTReader {
         public UniformQuantizerData bUniformQuantizerData;
         public UniformQuantizerData aUniformQuantizerData;
 
-        public ColorQuantizerData(Stream data) {
+        public ColorQuantizerData(StreamReader data) {
             int hsvFlag = data.ReadU8();
             int numberOfHueBits;
             int numberOfSaturationBits;
@@ -111,7 +111,7 @@ namespace DLAT.JTReader {
     }
     public class TextureQuantizerData {
         public UniformQuantizerData[] uniformQuantizerDatas;
-        public TextureQuantizerData(Stream data, int numberComponents) {
+        public TextureQuantizerData(StreamReader data, int numberComponents) {
             UniformQuantizerData[] uniformQuantizerDatas = new UniformQuantizerData[numberComponents];
 
             for(int i = 0; i < numberComponents; i++) {
@@ -131,7 +131,7 @@ namespace DLAT.JTReader {
         public List<int> xVertexCoordinates;
         public List<int> yVertexCoordinates;
         public List<int> zVertexCoordinates;
-        public QuantizedVertexCoordArray(Stream data) {
+        public QuantizedVertexCoordArray(StreamReader data) {
             pointQuantizerData = new PointQuantizerData(data);
             vertexCount = data.ReadI32();
             xVertexCoordinates = Int32CDP.ReadVecU32(data, PredictorType.PredLag1);
@@ -161,8 +161,8 @@ namespace DLAT.JTReader {
         public List<int> thetaCodes;
         public List<int> psiCodes;
         public List<float> normals;
-        public QuantizedVertexNormalArray(Stream data) {
-            numberOfBits = data.ReadByte();
+        public QuantizedVertexNormalArray(StreamReader data) {
+            numberOfBits = data.ReadU8();
             normalCount = data.ReadI32();
             sextantCodes = Int32CDP.ReadVecU32(data, PredictorType.PredLag1);
             octantCodes = Int32CDP.ReadVecU32(data, PredictorType.PredLag1);
@@ -185,7 +185,7 @@ namespace DLAT.JTReader {
         public List<int> valBlueCodes;
         public List<int> alphaCodes;
         public List<int> colorCodes;
-        public QuantizedVertexColorArray(Stream data) {
+        public QuantizedVertexColorArray(StreamReader data) {
             colorQuantizerData = new ColorQuantizerData(data);
             int numberOfBits = data.ReadU8();
             int numberOfColorFloats = data.ReadU8();
@@ -221,7 +221,7 @@ namespace DLAT.JTReader {
         public TextureQuantizerData textureQuantizerData;
         public List<int> uTextureCoordCodes;
         public List<int> vTextureCoordCodes;
-        public QuantizedVertexTextureCoordArray(Stream data) {
+        public QuantizedVertexTextureCoordArray(StreamReader data) {
             textureQuantizerData = new TextureQuantizerData(data, 2);
             int suggestedNumberOfBits = data.ReadU8();
             if (suggestedNumberOfBits < 0 || suggestedNumberOfBits > 24)

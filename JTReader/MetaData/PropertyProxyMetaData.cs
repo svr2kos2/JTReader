@@ -47,7 +47,7 @@ namespace DLAT.JTReader {
     }
     public class DatePropertyValue {
         public short year, month, day, hour, minute, second;
-        public DatePropertyValue(Stream data) {
+        public DatePropertyValue(StreamReader data) {
             year = data.ReadI16();
             month = data.ReadI16();
             day = data.ReadI16();

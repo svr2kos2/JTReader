@@ -16,7 +16,7 @@ namespace DLAT.JTReader {
         public GUID segmentID;
         public int segmentType;
         public uint segmentLength;
-        public Stream dataStream;
+        public StreamReader dataStream;
 
         public List<Element> elements;
 
@@ -69,18 +69,21 @@ namespace DLAT.JTReader {
                 if (compressionFlag == 2 && compressionAlgorithm == 2) {
                     compressed = true;
                     pos += 2; //skip zlib header
-                    dataStream = CODEC.DecompressZLIB(new MemoryStream(fb, (int)pos, compressedLength - 2));
+                    dataStream = new StreamReader(
+                        CODEC.DecompressZLIB(new MemoryStream(fb, (int)pos, compressedLength - 2)),
+                        file);
                 } else if (compressionFlag == 3 && compressionAlgorithm == 3) {
                     compressed = true;
-                    dataStream = CODEC.DecompressLZMA(new MemoryStream(fb, (int)pos, compressedLength));
+                    dataStream = new StreamReader(
+                        CODEC.DecompressLZMA(new MemoryStream(fb, (int)pos, compressedLength)),
+                        file);
                 } else
                     throw new Exception("unknown compress method");
             }
             if(!compressed) 
-                dataStream = new MemoryStream(fb, (int)pos,(int)segmentLength - 24);
+                dataStream = new StreamReader(new MemoryStream(fb, (int)pos,(int)segmentLength - 24),
+                    file);
             
-            dataStream.FromJTFile(jtFile);
-            dataStream.Position = 0;
             elements = new List<Element>();
             bool graphElementsRead = (file.majorVersion >= 10 && file.minorVersion >= 5);
             for(;dataStream.Position < dataStream.Length ; ) {
@@ -98,8 +101,6 @@ namespace DLAT.JTReader {
             if (segmentID == file.lsgSegmentID)
                 file.propertyTable = new PropertyTable(dataStream);
             
-
-            dataStream.RemoveJTFileBind();
             dataStream = null;
 
             //Debug.Log("Segment type(#b" +

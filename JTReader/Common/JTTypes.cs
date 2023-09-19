@@ -10,7 +10,7 @@ namespace DLAT.JTReader {
         public GUID(byte[] guid) {
             id = guid;
         }
-        public GUID(Stream data) {
+        public GUID(StreamReader data) {
             id = data.ReadBytes(16);
         }
 
@@ -72,7 +72,7 @@ namespace DLAT.JTReader {
     }
     public class DirF32 {
         public float x, y, z;
-        public DirF32(Stream data) {
+        public DirF32(StreamReader data) {
             x = data.ReadF32();
             y = data.ReadF32();
             z = data.ReadF32();
@@ -80,7 +80,7 @@ namespace DLAT.JTReader {
     }
     public class DirF64 {
         public double x, y, z;
-        public DirF64(Stream data) {
+        public DirF64(StreamReader data) {
             x = data.ReadF64();
             y = data.ReadF64();
             z = data.ReadF64();
@@ -94,7 +94,7 @@ namespace DLAT.JTReader {
     }
     public class CoordF32 {
         public float x, y, z;
-        public CoordF32(Stream data) {
+        public CoordF32(StreamReader data) {
             x = data.ReadF32();
             y = data.ReadF32();
             z = data.ReadF32();
@@ -102,7 +102,7 @@ namespace DLAT.JTReader {
     }
     public class CoordF64 {
         public double x, y, z;
-        public CoordF64(Stream data) {
+        public CoordF64(StreamReader data) {
             x = data.ReadF64();
             y = data.ReadF64();
             z = data.ReadF64();
@@ -110,7 +110,7 @@ namespace DLAT.JTReader {
     }
     public class HCoordF32 {
         public float x, y, z, w;
-        public HCoordF32(Stream data) {
+        public HCoordF32(StreamReader data) {
             x = data.ReadF32();
             y = data.ReadF32();
             z = data.ReadF32();
@@ -120,18 +120,18 @@ namespace DLAT.JTReader {
     public class CountRange {
         public int minCount;
         public int maxCount;
-        public CountRange(Stream data) {
+        public CountRange(StreamReader data) {
             minCount = data.ReadI32();
             maxCount = data.ReadI32();
         }
     }
     public class Mx4F32 {
         public float[] raw = new float[16];
-        public Mx4F32(Stream data) {
+        public Mx4F32(StreamReader data) {
             for (int i = 0; i < 16; i++)
                 raw[i] = data.ReadF32();
         }
-        public Mx4F32(Stream data,uint storedValuesMask) {
+        public Mx4F32(StreamReader data,uint storedValuesMask) {
             for (int i = 0; i < 16; i += 5)
                 raw[i] = 1;
             for (int i = 0; i < 16; ++i)
@@ -149,11 +149,11 @@ namespace DLAT.JTReader {
     public class Mx4F64 {
         public double[] raw = new double[16];
         public Mx4F64() { }
-        public Mx4F64(Stream data) {
+        public Mx4F64(StreamReader data) {
             for (int i = 0; i < 16; i++)
                 raw[i] = data.ReadF64();
         }
-        public Mx4F64(Stream data, uint storedValuesMask) {
+        public Mx4F64(StreamReader data, uint storedValuesMask) {
             for (int i = 0; i < 16; i += 5)
                 raw[i] = 1;
             for (int i = 0; i < 16; ++i)
@@ -162,7 +162,7 @@ namespace DLAT.JTReader {
     }
     public class PlaneF32 {
         public float a, b, c, d;
-        public PlaneF32(Stream data) {
+        public PlaneF32(StreamReader data) {
             a = data.ReadF32();
             b = data.ReadF32();
             c = data.ReadF32();
@@ -172,18 +172,24 @@ namespace DLAT.JTReader {
     public class BBoxF32 {
         public CoordF32 minCorner;
         public CoordF32 maxCorner;
-        public BBoxF32(Stream data) {
+        public BBoxF32(StreamReader data) {
             minCorner = new CoordF32(data);
             maxCorner = new CoordF32(data);
         }
     }
     public class RGBA {
         public float r, g, b, a;
-        public RGBA(Stream data) {
+        public RGBA(StreamReader data) {
             r = data.ReadF32();
             g = data.ReadF32();
             b = data.ReadF32();
             a = data.ReadF32();
+        }
+        public RGBA(float _r,float _g,float _b,float _a) {
+            r = _r;
+            g = _g;
+            b = _b;
+            a = _a;
         }
         public RGBA(float grey) {
             r = g = b = grey;
@@ -196,7 +202,7 @@ namespace DLAT.JTReader {
         public byte normalBitsFactor;
         public byte bitsPerTextureCoord;
         public byte bitsPerColor;
-        public QuantizationParameters(Stream data) {
+        public QuantizationParameters(StreamReader data) {
             bitsPerVertex = data.ReadU8();
             normalBitsFactor = data.ReadU8();
             bitsPerTextureCoord = data.ReadU8();
@@ -207,7 +213,7 @@ namespace DLAT.JTReader {
     public class PrimitiveSetQuantizationParameters {
         public byte bitsPerVertex;
         public byte bitsPerColor;
-        public PrimitiveSetQuantizationParameters(Stream data) {
+        public PrimitiveSetQuantizationParameters(StreamReader data) {
             bitsPerVertex = data.ReadU8();
             bitsPerColor = data.ReadU8();
         }

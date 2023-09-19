@@ -78,7 +78,7 @@ namespace DLAT.JTReader {
             else
                 ReadStandard(data);
         }
-        private void ReadStandard(Stream data) {
+        private void ReadStandard(StreamReader data) {
             borderMode = data.ReadI32();
             mipmapMagnificationFilter = data.ReadI32();
             mipmapMinificationFilter = data.ReadI32();
@@ -92,7 +92,7 @@ namespace DLAT.JTReader {
             textureTransform = new Mx4F32(data);
         }
 
-        private void ReadMajorVersion8Vers_1(Stream data) {
+        private void ReadMajorVersion8Vers_1(StreamReader data) {
             mipmapMagnificationFilter = data.ReadI32();
             mipmapMinificationFilter = data.ReadI32();
             S_DimenWrapMode = data.ReadI32();
@@ -105,7 +105,7 @@ namespace DLAT.JTReader {
     public class TextureCoordGenerationParameters {
         public int[] texCoordGenMode;
         public PlaneF32[] texCoordReferencePlane;
-        public TextureCoordGenerationParameters(Stream data) {
+        public TextureCoordGenerationParameters(StreamReader data) {
             texCoordGenMode = new int[4];
             texCoordReferencePlane = new PlaneF32[4];
             for (int i = 0; i < 4; ++i)
@@ -174,7 +174,7 @@ namespace DLAT.JTReader {
             mipmapsCount = data.ReadI16();
         }
 
-        private void ReadMajorVersion8Vers_1(Stream data) {
+        private void ReadMajorVersion8Vers_1(StreamReader data) {
             pixelFormat = data.ReadU32();
             pixelDataType = data.ReadU32();
             dimensionality = data.ReadI16();

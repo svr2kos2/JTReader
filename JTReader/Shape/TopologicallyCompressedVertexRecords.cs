@@ -6,7 +6,7 @@ namespace DLAT.JTReader {
         public CompressedVertexNormalArray compressedVertexNormalArray;
         public CompressedVertexColorArray compressedVertexColorArray;
 
-        public TopologicallyCompressedVertexRecords(Stream data) {
+        public TopologicallyCompressedVertexRecords(StreamReader data) {
             ulong vertexBindings = data.ReadU64();
             var quantizationParameters = new QuantizationParameters(data);
             var numberOfTopologicalVertices = data.ReadI32();
