@@ -14,7 +14,7 @@ namespace DLAT.JTReader {
 
         public TopoMeshCompressedRepDataV1(Element ele) {
             var data = ele.dataStream;
-            var isPolyLineShape = ObjectTypeIdentifiers.types[ele.objectTypeID.ToString()] ==
+            var isPolyLineShape = ObjectTypeIdentifiers.types[ele.objectTypeID] ==
                                   typeof(PolyLineSetShapeLODData);
             int numberOfFaceGroupListIndices = -1;
             if (isPolyLineShape || ele.minorVersion != 9) 

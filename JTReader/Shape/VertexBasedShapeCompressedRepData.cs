@@ -60,7 +60,7 @@ namespace DLAT.JTReader {
             var normals = new List<int>();
             for (var i = 1; i < indices.Count; ++i) {
                 for (var j = indices[i - 1]; j < indices[i] - 2; ++j) {
-                    var si = ((j - indices[i - 1]) % 2 == 0 ? new int[3] { 1, 0, 2 } : new int[3] { 0, 1, 2 }) ;
+                    var si = ((j - indices[i - 1]) % 2 == 0 ? new int[3] { 0, 1, 2 } : new int[3] { 1, 0, 2 }) ;
                     tri.AddRange(new [] { j + si[0], j + si[1], j + si[2] });
                 }
             }

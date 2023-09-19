@@ -13,6 +13,21 @@ namespace DLAT.JTReader {
         public GUID(Stream data) {
             id = data.ReadBytes(16);
         }
+
+        public GUID(string str) {
+            var sp = str.Split('-');
+            var res = new List<byte>();
+            foreach (var s in sp) {
+                var rev = new List<byte>();
+                for (var i = 0; i < s.Length; i += 2)
+                    rev.Add(Convert.ToByte(s.Substring(i, 2), 16));
+                rev.Reverse();
+                res.AddRange(rev);
+            }
+
+            id = res.ToArray();
+
+        }
         public override int GetHashCode() {
             var hashCode = 0;
             for (int i = 0; i < 16; i += 4)
@@ -47,6 +62,12 @@ namespace DLAT.JTReader {
             res += id[14].ToString("X2") + "-";
             res += id[15].ToString("X2");
             return res;
+        }
+        public bool isEOE() {
+            for (var i = 0; i < id.Length; i++)
+                if (id[i] != 0xFF)
+                    return false;
+            return true;
         }
     }
     public class DirF32 {
@@ -289,78 +310,72 @@ namespace DLAT.JTReader {
             {"A3CFB921-BDEB-48D7-B3-96-8B-8D-0E-F4-85-A0", "Mapping Plane Element"              }, //9 10
             {"AA1B831D-6E47-4FEE-A8-65-CD-7E-1F-2F-39-DC", "Texture Coordinate Generator Attribute Element"},//9 10
         };
-        public static Dictionary<string, Type> types = new Dictionary<string, Type> {
-            {"FFFFFFFF-FFFF-FFFF-FF-FF-FF-FF-FF-FF-FF-FF", null                                     }, //"Identifier to signal End-Of-Elements."
-            {"10DD1035-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(BaseNodeData)                     }, //"Base Node Element"
-            {"10DD101B-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(GroupNodeData)                    }, //"Group Node Element"
-            {"10DD102A-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(InstanceNodeData)                 }, //"Instance Node Element"
-            {"10DD102C-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(LODNodeData)                      }, //"LOD Node Element"
-            {"CE357245-38FB-11D1-A5-06-00-60-97-BD-C6-E1", typeof(MetaDataNodeData)                 }, //"Meta Data Node Element"
-            {"D239E7B6-DD77-4289-A0-7D-B0-EE-79-F7-94-94", typeof(NullShapeNodeData)                }, //"NULL Shape Node Element"
-            {"CE357244-38FB-11D1-A5-06-00-60-97-BD-C6-E1", typeof(PartNodeData)                     }, //"Part Node Element"
-            {"10DD103E-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(PartitionNodeData)                }, //"Partition Node Element"
-            {"10DD104C-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(RangeLODNodeData)                 }, //"Range LOD Node Element"
-            {"10DD10F3-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(SwitchNodeData)                   }, //"Switch Node Element"
-            {"10DD1059-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(BaseShapeNodeData)                }, //"Base Shape Node Element"
-            {"98134716-0010-0818-19-98-08-00-09-83-5D-5A", typeof(PointSetShapeNodeData)            }, //"Point Set Shape Node Element"
-            {"10DD1048-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(PolygonSetShapeNodeData)          }, //"Polygon Set Shape Node Element"
-            {"10DD1046-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(PolyLineSetShapeNodeData)         }, //"Polyline Set Shape Node Element"
-            {"E40373C1-1AD9-11D3-9D-AF-00-A0-C9-C7-DD-C2", typeof(PrimitiveSetShapeNodeData)        }, //"Primitive Set Shape Node Element"
-            {"10DD1077-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(Tri_StripSetShapeNodeData)        }, //"Tri-Strip Set Shape Node Element"
-            {"10DD107F-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(VertexShapeNodeData)              }, //"Vertex Shape Node Element"
-            {"10DD1001-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(BaseAttributeData)                }, //"Base Attribute Element"
-            {"10DD1014-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(DrawStyleAttributeData)           }, //"Draw Style Attribute Element"
-            {"10DD1083-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(GeometricTransformAttributeData)  }, //"Geometric Transform Attribute Element"
-            {"10DD1028-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(InfiniteLightAttributeData)       }, //"Infinite Light Attribute Element"
-            {"10DD1096-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(LightSetAttributeData)            }, //"Light Set Attribute Element"
-            {"10DD10C4-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(LinestyleAttributeData)           }, //"Linestyle Attribute Element"
-            {"10DD1030-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(MaterialAttributeData)            }, //"Material Attribute Element"
-            {"10DD1045-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(PointLightAttributeData)          }, //"Point Light Attribute Element"
-            {"8D57C010-E5CB-11D4-84-0E-00-A0-D2-18-2F-9D", typeof(PointstyleAttributeData)          }, //"Pointstyle Attribute Element"
-            {"10DD1073-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(TextureImageAttributeData)        }, //"Texture Image Attribute Element"
-            {"10DD104B-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(BasePropertyAtomData)             }, //"Base Property Atom Element"
-            {"CE357246-38FB-11D1-A5-06-00-60-97-BD-C6-E1", typeof(DatePropertyAtomData)             }, //"Date Property Atom Element"
-            {"10DD102B-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(IntegerPropertyAtomData)          }, //"Integer Property Atom Element"
-            {"10DD1019-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(FloatingPropertyAtomData)         }, //"Floating Point Property Atom Element"
-            {"E0B05BE5-FBBD-11D1-A3-A7-00-AA-00-D1-09-54", typeof(LateLoadedPropertyAtomData)       }, //"Late Loaded Property Atom Element"
-            {"10DD1004-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(JTObjectReferencePropertyAtomData)}, //"JT Object Reference Property AtomElement"
-            {"10DD106E-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(StringPropertyAtomData)           }, //"String Property Atom Element"
-            {"873A70C0-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(JTB_RepData)                      }, //"JT B-Rep Element"
-            {"CE357249-38FB-11D1-A5-06-00-60-97-BD-C6-E1", typeof(PMIManagerMetaData)               }, //"PMI Manager Meta Data Element"
-            {"CE357247-38FB-11D1-A5-06-00-60-97-BD-C6-E1", typeof(PropertyProxyMetaData)            }, //"Property Proxy Meta Data Element"
-            {"3E637AED-2A89-41F8-A9-FD-55-37-37-03-96-82", typeof(NullShapeNodeData)                }, //"Null Shape LOD Element"
-            {"98134716-0011-0818-19-98-08-00-09-83-5D-5A", typeof(PointSetShapeLODData)             }, //"Point Set Shape LOD Element"
-            {"10DD109F-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(PolygonSetShapeLODData)           }, //"Polygon Set Shape LOD Element"
-            {"10DD10A1-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(PolyLineSetShapeLODData)         }, //"Polyline Set Shape LOD Element"
-            {"E40373C2-1AD9-11D3-9D-AF-00-A0-C9-C7-DD-C2", typeof(PrimitiveSetShapeData)            }, //"Primitive Set Shape Element"
-            {"10DD10AB-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(Tri_StripSetShapeLODData)         }, //"Tri-Strip Set Shape LOD Element"
-            {"10DD10B0-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(VertexShapeLODData)               }, //"Vertex Shape LOD Element"
-            {"873A70E0-2AC9-11D1-9B-6B-00-80-C7-BB-59-97", typeof(XTB_RepData)                      }, //"XT B-Rep Element"
-            {"873A70D0-2AC8-11D1-9B-6B-00-80-C7-BB-59-97", typeof(WireframeRepData)                 }, //"Wireframe Rep Element"
-            {"4CC7A521-0728-11D3-9D-8B-00-A0-C9-C7-DD-C2", typeof(WireHarnessSetShapeNodeData) /*8*/}, //"Wire Harness Set Shape Node"
-            {"4CC7A523-0728-11D3-9D-8B-00-A0-C9-C7-DD-C2", typeof(WireHarnessSetShapeData)     /*8*/}, //"Wire Harness Set Shape Element"
-            {"AA1B831D-6E47-4FEE-A8-65-CD-7E-1F-2F-39-DB", typeof(ShaderEffectsAttributeData) /*89*/}, //"Shader Effects Attribute Element"
-            {"AD8DCCC2-7A80-456D-B0-D5-DD-3A-0B-8D-21-E7", typeof(FragmentShaderAttributeData)/*89*/}, //"Fragment Shader Attribute Element"
-            {"2798BCAD-E409-47AD-BD-46-0B-37-1F-D7-5D-61", typeof(VertexShaderAttributeData)  /*89*/}, //"Vertex Shader Attribute Element"
-            {"D67F8EA8-F524-4879-92-8C-4C-3A-56-1F-B9-3A", typeof(JTLWPAData)                /*910*/}, //"JT LWPA Element "
-            {"F338A4AF-D7D2-41C5-BC-F2-C5-5A-88-B2-1E-73", typeof(JTULPData)                 /*910*/}, //9 10
-            {"92F5B094-6499-4D2D-92-AA-60-D0-5A-44-32-CF", typeof(MappingTriPlanarData)      /*910*/}, //Mapping TriPlanar Element"
-            {"72475FD1-2823-4219-A0-6C-D9-E6-E3-9A-45-C1", typeof(MappingSphereData)         /*910*/}, //"Mapping Sphere Element"
-            {"3E70739D-8CB0-41EF-84-5C-A1-98-D4-00-3B-3F", typeof(MappingCylinderData)       /*910*/}, //"Mapping Cylinder Element"
-            {"A3CFB921-BDEB-48D7-B3-96-8B-8D-0E-F4-85-A0", typeof(MappPlaneData)             /*910*/}, //"Mapping Plane Element"
-            {"AA1B831D-6E47-4FEE-A8-65-CD-7E-1F-2F-39-DC", typeof(TextureCoordinateGeneratorAttributeData)},//"Texture Coordinate Generator Attribute Element"
+        public static Dictionary<GUID, Type> types = new Dictionary<GUID, Type> {
+            {new GUID("FFFFFFFF-FFFF-FFFF-FF-FF-FF-FF-FF-FF-FF-FF"), null                                     }, //"Identifier to signal End-Of-Elements."
+            {new GUID("10DD1035-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(BaseNodeData)                     }, //"Base Node Element"
+            {new GUID("10DD101B-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(GroupNodeData)                    }, //"Group Node Element"
+            {new GUID("10DD102A-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(InstanceNodeData)                 }, //"Instance Node Element"
+            {new GUID("10DD102C-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(LODNodeData)                      }, //"LOD Node Element"
+            {new GUID("CE357245-38FB-11D1-A5-06-00-60-97-BD-C6-E1"), typeof(MetaDataNodeData)                 }, //"Meta Data Node Element"
+            {new GUID("D239E7B6-DD77-4289-A0-7D-B0-EE-79-F7-94-94"), typeof(NullShapeNodeData)                }, //"NULL Shape Node Element"
+            {new GUID("CE357244-38FB-11D1-A5-06-00-60-97-BD-C6-E1"), typeof(PartNodeData)                     }, //"Part Node Element"
+            {new GUID("10DD103E-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(PartitionNodeData)                }, //"Partition Node Element"
+            {new GUID("10DD104C-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(RangeLODNodeData)                 }, //"Range LOD Node Element"
+            {new GUID("10DD10F3-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(SwitchNodeData)                   }, //"Switch Node Element"
+            {new GUID("10DD1059-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(BaseShapeNodeData)                }, //"Base Shape Node Element"
+            {new GUID("98134716-0010-0818-19-98-08-00-09-83-5D-5A"), typeof(PointSetShapeNodeData)            }, //"Point Set Shape Node Element"
+            {new GUID("10DD1048-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(PolygonSetShapeNodeData)          }, //"Polygon Set Shape Node Element"
+            {new GUID("10DD1046-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(PolyLineSetShapeNodeData)         }, //"Polyline Set Shape Node Element"
+            {new GUID("E40373C1-1AD9-11D3-9D-AF-00-A0-C9-C7-DD-C2"), typeof(PrimitiveSetShapeNodeData)        }, //"Primitive Set Shape Node Element"
+            {new GUID("10DD1077-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(Tri_StripSetShapeNodeData)        }, //"Tri-Strip Set Shape Node Element"
+            {new GUID("10DD107F-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(VertexShapeNodeData)              }, //"Vertex Shape Node Element"
+            {new GUID("10DD1001-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(BaseAttributeData)                }, //"Base Attribute Element"
+            {new GUID("10DD1014-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(DrawStyleAttributeData)           }, //"Draw Style Attribute Element"
+            {new GUID("10DD1083-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(GeometricTransformAttributeData)  }, //"Geometric Transform Attribute Element"
+            {new GUID("10DD1028-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(InfiniteLightAttributeData)       }, //"Infinite Light Attribute Element"
+            {new GUID("10DD1096-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(LightSetAttributeData)            }, //"Light Set Attribute Element"
+            {new GUID("10DD10C4-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(LinestyleAttributeData)           }, //"Linestyle Attribute Element"
+            {new GUID("10DD1030-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(MaterialAttributeData)            }, //"Material Attribute Element"
+            {new GUID("10DD1045-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(PointLightAttributeData)          }, //"Point Light Attribute Element"
+            {new GUID("8D57C010-E5CB-11D4-84-0E-00-A0-D2-18-2F-9D"), typeof(PointstyleAttributeData)          }, //"Pointstyle Attribute Element"
+            {new GUID("10DD1073-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(TextureImageAttributeData)        }, //"Texture Image Attribute Element"
+            {new GUID("10DD104B-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(BasePropertyAtomData)             }, //"Base Property Atom Element"
+            {new GUID("CE357246-38FB-11D1-A5-06-00-60-97-BD-C6-E1"), typeof(DatePropertyAtomData)             }, //"Date Property Atom Element"
+            {new GUID("10DD102B-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(IntegerPropertyAtomData)          }, //"Integer Property Atom Element"
+            {new GUID("10DD1019-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(FloatingPropertyAtomData)         }, //"Floating Point Property Atom Element"
+            {new GUID("E0B05BE5-FBBD-11D1-A3-A7-00-AA-00-D1-09-54"), typeof(LateLoadedPropertyAtomData)       }, //"Late Loaded Property Atom Element"
+            {new GUID("10DD1004-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(JTObjectReferencePropertyAtomData)}, //"JT Object Reference Property AtomElement"
+            {new GUID("10DD106E-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(StringPropertyAtomData)           }, //"String Property Atom Element"
+            {new GUID("873A70C0-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(JTB_RepData)                      }, //"JT B-Rep Element"
+            {new GUID("CE357249-38FB-11D1-A5-06-00-60-97-BD-C6-E1"), typeof(PMIManagerMetaData)               }, //"PMI Manager Meta Data Element"
+            {new GUID("CE357247-38FB-11D1-A5-06-00-60-97-BD-C6-E1"), typeof(PropertyProxyMetaData)            }, //"Property Proxy Meta Data Element"
+            {new GUID("3E637AED-2A89-41F8-A9-FD-55-37-37-03-96-82"), typeof(NullShapeNodeData)                }, //"Null Shape LOD Element"
+            {new GUID("98134716-0011-0818-19-98-08-00-09-83-5D-5A"), typeof(PointSetShapeLODData)             }, //"Point Set Shape LOD Element"
+            {new GUID("10DD109F-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(PolygonSetShapeLODData)           }, //"Polygon Set Shape LOD Element"
+            {new GUID("10DD10A1-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(PolyLineSetShapeLODData)         }, //"Polyline Set Shape LOD Element"
+            {new GUID("E40373C2-1AD9-11D3-9D-AF-00-A0-C9-C7-DD-C2"), typeof(PrimitiveSetShapeData)            }, //"Primitive Set Shape Element"
+            {new GUID("10DD10AB-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(Tri_StripSetShapeLODData)         }, //"Tri-Strip Set Shape LOD Element"
+            {new GUID("10DD10B0-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(VertexShapeLODData)               }, //"Vertex Shape LOD Element"
+            {new GUID("873A70E0-2AC9-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(XTB_RepData)                      }, //"XT B-Rep Element"
+            {new GUID("873A70D0-2AC8-11D1-9B-6B-00-80-C7-BB-59-97"), typeof(WireframeRepData)                 }, //"Wireframe Rep Element"
+            {new GUID("4CC7A521-0728-11D3-9D-8B-00-A0-C9-C7-DD-C2"), typeof(WireHarnessSetShapeNodeData) /*8*/}, //"Wire Harness Set Shape Node"
+            {new GUID("4CC7A523-0728-11D3-9D-8B-00-A0-C9-C7-DD-C2"), typeof(WireHarnessSetShapeData)     /*8*/}, //"Wire Harness Set Shape Element"
+            {new GUID("AA1B831D-6E47-4FEE-A8-65-CD-7E-1F-2F-39-DB"), typeof(ShaderEffectsAttributeData) /*89*/}, //"Shader Effects Attribute Element"
+            {new GUID("AD8DCCC2-7A80-456D-B0-D5-DD-3A-0B-8D-21-E7"), typeof(FragmentShaderAttributeData)/*89*/}, //"Fragment Shader Attribute Element"
+            {new GUID("2798BCAD-E409-47AD-BD-46-0B-37-1F-D7-5D-61"), typeof(VertexShaderAttributeData)  /*89*/}, //"Vertex Shader Attribute Element"
+            {new GUID("D67F8EA8-F524-4879-92-8C-4C-3A-56-1F-B9-3A"), typeof(JTLWPAData)                /*910*/}, //"JT LWPA Element "
+            {new GUID("F338A4AF-D7D2-41C5-BC-F2-C5-5A-88-B2-1E-73"), typeof(JTULPData)                 /*910*/}, //9 10
+            {new GUID("92F5B094-6499-4D2D-92-AA-60-D0-5A-44-32-CF"), typeof(MappingTriPlanarData)      /*910*/}, //Mapping TriPlanar Element"
+            {new GUID("72475FD1-2823-4219-A0-6C-D9-E6-E3-9A-45-C1"), typeof(MappingSphereData)         /*910*/}, //"Mapping Sphere Element"
+            {new GUID("3E70739D-8CB0-41EF-84-5C-A1-98-D4-00-3B-3F"), typeof(MappingCylinderData)       /*910*/}, //"Mapping Cylinder Element"
+            {new GUID("A3CFB921-BDEB-48D7-B3-96-8B-8D-0E-F4-85-A0"), typeof(MappPlaneData)             /*910*/}, //"Mapping Plane Element"
+            {new GUID("AA1B831D-6E47-4FEE-A8-65-CD-7E-1F-2F-39-DC"), typeof(TextureCoordinateGeneratorAttributeData)},//"Texture Coordinate Generator Attribute Element"
         };
         public static string GetTypeString(string typeID) {
             return typeStrings[typeID];
         }
         public static string GetTypeString(GUID typeID) {
             return typeStrings[typeID.ToString()];
-        }
-        public static bool isEoe(string typeID) {
-            return typeID == "FFFFFFFF-FFFF-FFFF-FF-FF-FF-FF-FF-FF-FF-FF";
-        }
-        public static bool isEoe(GUID typeID) {
-            return isEoe(typeID.ToString());
         }
 
     }

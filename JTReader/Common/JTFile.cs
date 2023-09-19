@@ -77,7 +77,7 @@ namespace DLAT.JTReader {
             //     //seg.InitializeElements();
             //     segments.Add(seg);
             // }
-            Console.WriteLine("v" + Version + " seg:" + entryCount + " " + filePath);
+            //Console.WriteLine("v" + Version + " seg:" + entryCount + " " + filePath);
 
             elements = new Dictionary<int, Element>();
             segments = new Dictionary<GUID, DataSegment>();
@@ -95,7 +95,7 @@ namespace DLAT.JTReader {
             //         throw new Exception("WTF?!");
             //     
             // }
-            Console.WriteLine("t:" + (DateTime.Now - start).TotalSeconds);
+            //Console.WriteLine("t:" + (DateTime.Now - start).TotalSeconds);
             //Debug.Log("#gRead Done!#w");
         }
 

@@ -42,7 +42,7 @@ namespace DLAT.JTReader {
                     objectID = data.ReadI32();
                 }
                 
-                if(ele.objectTypeID.ToString() == Tri_StripSetShapeLODData.typeID) {
+                if(ele.objectTypeID == Tri_StripSetShapeLODData.typeID) {
                     topoMeshTopologicallyCompressedLODData = new TopoMeshTopologicallyCompressedLODData(ele);
                 } else {
                     // Skip two unknown bytes

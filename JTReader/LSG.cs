@@ -61,9 +61,11 @@ namespace DLAT.JTReader {
 
                     if (value is LateLoadedPropertyAtomData)
                         value = ele.segment.file.segments[(value as LateLoadedPropertyAtomData).segmeentID];
-                    
-                    property.Add(key, value);
-                    
+
+                    if (!property.ContainsKey(key))
+                        property.Add(key, value);
+
+
                     if (value is PropertyProxyMetaData) {
                         
                         var proxy = value as PropertyProxyMetaData;
@@ -71,6 +73,8 @@ namespace DLAT.JTReader {
                             var k = p.Key;
                             var t = p.Value.Item1;
                             var v = p.Value.Item2;
+                            if(property.ContainsKey(k))
+                                continue;
                             property.Add(k, v);
                         }
                     }

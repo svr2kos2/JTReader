@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DLAT.JTReader {
     public class Tri_StripSetShapeLODData {
-        public static string typeID = "10DD10AB-2AC8-11D1-9B-6B-00-80-C7-BB-59-97";
+        public static GUID typeID = new GUID("10DD10AB-2AC8-11D1-9B-6B-00-80-C7-BB-59-97");
         public VertexShapeLODData vertexShapeLodData;
         public short versionNumber;
         public VertexBasedShapeCompressedRepData vertexBasedShapeData;

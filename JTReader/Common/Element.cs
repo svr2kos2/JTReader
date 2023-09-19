@@ -12,7 +12,17 @@ namespace DLAT.JTReader {
         public int objectID = -1;
         public Stream dataStream;
         public Type elementType;
-        public object elementData;
+
+        private object _elementData;
+        public object elementData {
+            get {
+                if (_elementData == null)
+                    Instantiate();
+                return _elementData;
+            }
+        }
+
+        
 
         public int majorVersion => segment.majorVersion;
         public int minorVersion => segment.minorVersion;
@@ -20,7 +30,7 @@ namespace DLAT.JTReader {
         public void Instantiate() {
             if (dataStream == null)
                 return;
-            elementData = Activator.CreateInstance(elementType, new object[] { this });
+            _elementData = Activator.CreateInstance(elementType, new object[] { this });
             dataStream = null;
         }
         
@@ -42,18 +52,18 @@ namespace DLAT.JTReader {
             dataStream = new MemoryStream(stream.ReadBytes(elementLength - (int)(stream.Position - begin), 1));
             dataStream.FromJTFile(stream.FromJTFile());
             dataStream.Position = 0;
-            if (!ObjectTypeIdentifiers.types.ContainsKey(objectTypeID.ToString())) {
+            if (!ObjectTypeIdentifiers.types.ContainsKey(objectTypeID)) {
                 dataStream = null;   
                 return;
             }
-            elementType = ObjectTypeIdentifiers.types[objectTypeID.ToString()];
-            
-            Instantiate();
-            
-            if (elementType == typeof(PropertyProxyMetaData)) {
-                var data = elementData;
-            }
-            
+            elementType = ObjectTypeIdentifiers.types[objectTypeID];
+            if (segment.segmentType == 1)
+                Instantiate();
+            //
+            // if (elementType == typeof(PropertyProxyMetaData)) {
+            //     var data = elementData;
+            // }
+
 
             //Debug.Log("    Element ID:" + objectID
             //                            + " type(#g" + ObjectTypeIdentifiers.GetTypeString(objectTypeID) + "#w) "

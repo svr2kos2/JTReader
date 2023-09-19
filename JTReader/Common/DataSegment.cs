@@ -85,7 +85,7 @@ namespace DLAT.JTReader {
             bool graphElementsRead = (file.majorVersion >= 10 && file.minorVersion >= 5);
             for(;dataStream.Position < dataStream.Length ; ) {
                 var ele = new Element(this);
-                if (ObjectTypeIdentifiers.isEoe(ele.objectTypeID)) {
+                if (ele.objectTypeID.isEOE()) {
                     if (segmentID != file.lsgSegmentID || graphElementsRead)
                         break;
                     graphElementsRead = true;

@@ -42,15 +42,15 @@ namespace JTReaderTest {
             var startTime = DateTime.Now;
             
             
-            //var jtFileDirectory = "C:\\Users\\root\\Desktop\\share\\LIB_ROOT";
+            var jtFileDirectory = "C:\\Users\\root\\Desktop\\share\\LIB_ROOT";
             //var jtFileDirectory = "E:\\workspace\\JTFiles\\robot";
-            var jtFileDirectory = "E:\\workspace\\JTFiles";
+            //var jtFileDirectory = "E:\\workspace\\JTFiles";
             //var jtFileDirectory = "E:\\workspace\\JTDump";
             
             Queue<string> dirs = new Queue<string>();
             dirs.Enqueue(jtFileDirectory);
 
-            //var readers = new List<Task<LSG>>();
+            var readers = new List<Task<LSG>>();
             
             
             for (; dirs.Count != 0;) {
@@ -59,13 +59,13 @@ namespace JTReaderTest {
                 foreach (var jtFile in files) {
                     if (jtFile.EndsWith(".jt")) {
                         var task = Task.Run(() => {
-                            
+                            var f = new JTFile(jtFile);
+                            return new LSG(f);
                         });
-                        var f = new JTFile(jtFile);
-                        var l =  new LSG(f);
+                        
                         //return l;
                         //task.Wait();
-                        //readers.Add(task);
+                        readers.Add(task);
                     }
                 }
 
@@ -78,7 +78,7 @@ namespace JTReaderTest {
             ClearMemory();
             //DLAT.JTReader.Debug.Log("#gAll task created. waiting...#w");
             
-            //Task.WaitAll(readers.ToArray());
+            Task.WaitAll(readers.ToArray());
 
             //for (;;) {
             //    Task.Delay(1000).Wait();
